@@ -46,13 +46,8 @@ def load_prepare_attributes(filepath: str) -> pd.DataFrame:
     return df[["name", "final_position","age", "preferred foot", "weak foot", "skill moves"] + norm_cols]
 
 def filter_and_process_players(file_path):
-    # Load the data
     df = pd.read_csv(file_path)
-    
-    # Filter for players who played in the last season 2024
     df_filtered = df[df['last_season'] == 2024]
-    
-    # Select specific columns
     columns_of_interest = [
         'player_id',
         'name',
@@ -63,14 +58,20 @@ def filter_and_process_players(file_path):
         'market_value_in_eur',
         'highest_market_value_in_eur'
     ]
-    
-    df_selected = df_filtered[columns_of_interest]
-        
+    df_selected = df_filtered[columns_of_interest].copy()
     for column in columns_of_interest:
         df_selected = df_selected.dropna(subset=[column])
-    df_selected.columns = [col.replace("_", " ") for col in df_selected.columns]
-    
-    
+    df_selected.loc[:, "contract_expiration_date"] = pd.to_datetime(
+        df_selected["contract_expiration_date"], errors="coerce"
+    )
+    df_selected.loc[:, "contract_expiration_year"] = df_selected["contract_expiration_date"].apply(
+        lambda x: x.year if pd.notnull(x) else None
+    )
+    df_selected = df_selected.drop(columns=["contract_expiration_date"])
+    df_selected.columns = [
+        col if col == 'player_id' else col.replace("_", " ") for col in df_selected.columns
+    ]
+
     return df_selected
 def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.DataFrame) -> pd.DataFrame:
 
@@ -79,29 +80,17 @@ def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.Dat
     players_df = players_df.drop_duplicates(subset=["name"])
     attributes_df = attributes_df.drop_duplicates(subset=["name"])
     merged_df = pd.merge(players_df, attributes_df, on="name", how="inner")
-    merged_df.columns = [col.replace("_", " ") for col in merged_df.columns]
     return merged_df
 
 def summarize_player_statistics(file_path):
-    # טעינת הנתונים מהקובץ CSV
     df = pd.read_csv(file_path)
-    
-    # בדיקה שהעמודות קיימות
+    print("Columns in appearances file:", df.columns.tolist())
     if 'player_id' in df.columns and 'goals' in df.columns and 'assists' in df.columns and 'date' in df.columns:
-        # המרת עמודת התאריך לפורמט datetime
         df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        
-        # טווח התאריכים לסינון
         start_date = pd.Timestamp('2023-07-01')
         end_date = pd.Timestamp('2024-07-01')
-        
-        # סינון השורות לפי התאריכים
         df = df[(df['date'] >= start_date) & (df['date'] < end_date)]
-        
-        # קבוצה לפי player_id וסכימת הגולים והבישולים
         summary_df = df.groupby('player_id')[['goals', 'assists']].sum().reset_index()
-        
-        # החלפת ערכים חסרים ב-0
         summary_df[['goals', 'assists']] = summary_df[['goals', 'assists']].fillna(0)
     else:
         print("One or more columns are missing in the dataframe.")
@@ -113,6 +102,6 @@ def merge_with_appearances(merged_df: pd.DataFrame, appearances_df: pd.DataFrame
     merged_full = pd.merge(merged_df, appearances_df, on="player_id", how="left")
     merged_full["goals"] = merged_full["goals"].fillna(0).astype(int)
     merged_full["assists"] = merged_full["assists"].fillna(0).astype(int)
-
+    merged_full=merged_full.drop(columns=["player_id"])
     return merged_full
 
