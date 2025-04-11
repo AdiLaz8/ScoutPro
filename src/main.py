@@ -1,5 +1,7 @@
 import os
 import processing
+import json
+
 
 def get_relative_path(filename):
     """
@@ -18,10 +20,8 @@ attributes_df = processing.load_prepare_attributes(get_relative_path('male_playe
 merged_df = processing.merge_players_and_attributes(players_df, attributes_df)
 player_stats_df = processing.summarize_player_statistics(get_relative_path('appearances.csv'))
 final_df = processing.merge_with_appearances(merged_df, player_stats_df)
-final_df.to_csv("../data/final_players_data.csv", index=False)
+#final_df.to_csv("../data/final_players_data.csv", index=False)
+check=processing.create_teams_positions_dict(final_df)['Futbol Club Barcelona']
+##print(json.dumps(check, indent=4, ensure_ascii=False))
+##print(final_df.head(40))
 
-print(final_df.head(40))
-
-print("Number of rows and columns in the final DataFrame:", final_df.shape)
-print(final_df["goals"].describe())
-print(final_df["final_position"].value_counts())

@@ -84,7 +84,6 @@ def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.Dat
 
 def summarize_player_statistics(file_path):
     df = pd.read_csv(file_path)
-    print("Columns in appearances file:", df.columns.tolist())
     if 'player_id' in df.columns and 'goals' in df.columns and 'assists' in df.columns and 'date' in df.columns:
         df['date'] = pd.to_datetime(df['date'], errors='coerce')
         start_date = pd.Timestamp('2023-07-01')
@@ -103,5 +102,22 @@ def merge_with_appearances(merged_df: pd.DataFrame, appearances_df: pd.DataFrame
     merged_full["goals"] = merged_full["goals"].fillna(0).astype(int)
     merged_full["assists"] = merged_full["assists"].fillna(0).astype(int)
     merged_full=merged_full.drop(columns=["player_id"])
+    if "final_position" in merged_full.columns:
+        merged_full = merged_full.rename(columns={"final_position": "position"})
+    merged_full = merged_full.rename(columns={"current club name": "club name"})
+    merged_full.columns = [col.replace("_", " ") for col in merged_full.columns]
     return merged_full
+
+def create_teams_positions_dict(df):
+    if not {'club name', 'position'}.issubset(df.columns):
+        print("Missing required columns in the DataFrame.")
+        return None
+    teams_dict = {}
+    for (team, position), group in df.groupby(['club name', 'position']):
+        if team not in teams_dict:
+            teams_dict[team] = {}
+        if position not in teams_dict[team]:
+            teams_dict[team][position] = []
+        teams_dict[team][position].extend(group.to_dict('records'))  
+    return teams_dict
 
