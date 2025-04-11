@@ -86,17 +86,4 @@ def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.Dat
     merged_df.columns = [col.replace("_", " ") for col in merged_df.columns]
 
     return merged_df
-# Usage example:
-players_df = filter_and_process_players("/Users/jonathan_panov/Downloads/ScoutPro/data/players.csv")
-attributes_df = load_prepare_attributes("/Users/jonathan_panov/Downloads/ScoutPro/data/male_players.csv")
-merged_df = merge_players_and_attributes(players_df, attributes_df)
-
-
-
-print(merged_df.head())
-
-print(merged_df.head())
-
-print("Total rows in the DataFrame:", merged_df.shape[0])
-print(merged_df.columns.tolist())
 
