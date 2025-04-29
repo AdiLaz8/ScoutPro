@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Criteria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<div class="container">
+    <h1 class="mb-4 text-primary">Select Criteria for {{ team_name }}</h1>
+
+    <a href="{{ url_for('select_team') }}" class="btn btn-secondary mb-4">⬅️ Back to Select Team</a>
+    <a href="{{ url_for('recommendations_page', team_name=team_name) }}" class="btn btn-primary mb-4 ms-2">
+    📋 View Smart Recommendations
+    </a>
+
+
+    <form method="post" id="criteriaForm">
+        <!-- כללי -->
+        <h3 class="text-secondary">General</h3>
+
+        <div class="mb-3">
+            <label for="position" class="form-label">Position:</label>
+            <select name="position" id="position" class="form-select" required>
+                {% for pos in positions %}
+                    <option value="{{ pos }}">{{ pos }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- גיל -->
+        <div class="mb-4">
+            <label class="form-label">Age Range:</label>
+            <div id="ageRange"></div>
+            <input type="hidden" name="min_age" id="min_age">
+            <input type="hidden" name="max_age" id="max_age">
+            <div class="d-flex justify-content-between mt-2">
+                <span>Min: <span id="minAgeLabel">25</span></span>
+                <span>Max: <span id="maxAgeLabel">40</span></span>
+            </div>
+        </div>
+
+        <!-- גובה -->
+        <div class="mb-4">
+            <label class="form-label">Height Range (cm):</label>
+            <div id="heightRange"></div>
+            <input type="hidden" name="min_height" id="min_height">
+            <input type="hidden" name="max_height" id="max_height">
+            <div class="d-flex justify-content-between mt-2">
+                <span>Min: <span id="minHeightLabel">170</span> cm</span>
+                <span>Max: <span id="maxHeightLabel">190</span> cm</span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="preferred_foot" class="form-label">Preferred Foot:</label>
+            <select name="preferred_foot" id="preferred_foot" class="form-select">
+                <option value="">--Any--</option>
+                <option value="right">Right</option>
+                <option value="left">Left</option>
+            </select>
+        </div>
+
+        <!-- תזוזות -->
+        <div class="mb-4">
+            <label class="form-label">Skill Moves (1-5):</label>
+            <div id="skillMovesSlider"></div>
+            <input type="hidden" name="skill_moves" id="skill_moves">
+            <div class="d-flex justify-content-between mt-2">
+                <span>Min: 1</span>
+                <span>Max: 5</span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="nationality" class="form-label">Nationality:</label>
+            <input type="text" class="form-control" name="nationality" id="nationality">
+        </div>
+
+        <hr>
+
+        <!-- חוזה ושוק -->
+        <h3 class="text-secondary">Market & Contract</h3>
+
+        <div class="mb-3">
+            <label for="max_budget" class="form-label">Max Budget (€):</label>
+            <input type="number" class="form-control" name="max_budget" id="max_budget">
+        </div>
+
+        <div class="mb-3">
+            <label for="contract_exp" class="form-label">Contract Expiration Year: <span id="contractExpValue">2028</span></label>
+            <input type="range" class="form-range" name="contract_exp" id="contract_exp" min="2025" max="2035" value="2028" oninput="document.getElementById('contractExpValue').innerText = this.value;">
+        </div>
+
+        <div class="mb-3">
+            <label for="curr_club" class="form-label">Current Club:</label>
+            <select name="curr_club" id="curr_club" class="form-select">
+                <option value="">--Any--</option>
+                {% for club in clubs %}
+                    <option value="{{ club }}">{{ club }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <hr>
+
+        <!-- אלפא -->
+        <h3 class="text-secondary">Scoring Weight</h3>
+
+        <div class="mb-3">
+            <label for="alpha" class="form-label">Alpha (Weight for Content Score):</label>
+            <input type="range" class="form-range" name="alpha" id="alpha" min="0" max="1" step="0.1" value="0.3" oninput="document.getElementById('alphaValue').innerText = this.value">
+            <div><small>Selected alpha: <span id="alphaValue">0.3</span></small></div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">Search Players</button>
+            <button type="reset" class="btn btn-outline-danger ms-2" onclick="resetSliderLabels()">Reset Form</button>
+        </div>
+    </form>
+</div>
+
+<!-- סקריפטים -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+
+<script>
+    function resetSliderLabels() {
+        setTimeout(function () {
+            document.getElementById('contractExpValue').innerText = document.getElementById('contract_exp').value;
+            document.getElementById('alphaValue').innerText = document.getElementById('alpha').value;
+            ageSlider.noUiSlider.set([25, 40]);
+            heightSlider.noUiSlider.set([170, 190]);
+            skillMovesSlider.noUiSlider.set(3);
+        }, 50);
+    }
+
+    var ageSlider = document.getElementById('ageRange');
+    noUiSlider.create(ageSlider, {
+        start: [25, 40],
+        connect: true,
+        range: { 'min': 16, 'max': 45 },
+        step: 1,
+        tooltips: true,
+        format: {
+            to: v => Math.round(v),
+            from: v => Number(v)
+        }
+    });
+    ageSlider.noUiSlider.on('update', function(values) {
+        document.getElementById('min_age').value = values[0];
+        document.getElementById('max_age').value = values[1];
+        document.getElementById('minAgeLabel').innerText = values[0];
+        document.getElementById('maxAgeLabel').innerText = values[1];
+    });
+
+    var heightSlider = document.getElementById('heightRange');
+    noUiSlider.create(heightSlider, {
+        start: [170, 190],
+        connect: true,
+        range: { 'min': 150, 'max': 210 },
+        step: 1,
+        tooltips: true,
+        format: {
+            to: v => Math.round(v),
+            from: v => Number(v)
+        }
+    });
+    heightSlider.noUiSlider.on('update', function(values) {
+        document.getElementById('min_height').value = values[0];
+        document.getElementById('max_height').value = values[1];
+        document.getElementById('minHeightLabel').innerText = values[0];
+        document.getElementById('maxHeightLabel').innerText = values[1];
+    });
+
+    var skillMovesSlider = document.getElementById('skillMovesSlider');
+    noUiSlider.create(skillMovesSlider, {
+        start: 3,
+        connect: [true, false],
+        range: { 'min': 1, 'max': 5 },
+        step: 1,
+        tooltips: true,
+        format: {
+            to: v => Math.round(v),
+            from: v => Number(v)
+        }
+    });
+    skillMovesSlider.noUiSlider.on('update', function(values) {
+        document.getElementById('skill_moves').value = values[0];
+    });
+</script>
+</body>
+</html>
