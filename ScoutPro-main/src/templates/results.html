@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<div class="container">
+    <h1 class="mb-4 text-primary">Results for {{ team_name }} (Position: {{ position }})</h1>
+
+    <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-secondary mb-4">⬅️ Back to Criteria</a>
+
+    {% if players %}
+    <div class="table-responsive">
+        <table id="playersTable" class="table table-striped table-bordered table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>Final Score</th>
+                    <th>Content Score</th>
+                    <th>Similarity Score</th>
+                    {% for key in players[0].keys() %}
+                        {% if key not in ["final_score", "content_score", "similarity_score"] %}
+                            <th>{{ key }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <!-- Final Score -->
+                    <td>
+                        {% if player.get('final_score') is not none %}
+                            {{ "%.3f"|format(player.get('final_score')) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <!-- Content Score -->
+                    <td>
+                        {% if player.get('content_score') is not none %}
+                            {{ "%.3f"|format(player.get('content_score')) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <!-- Similarity Score -->
+                    <td>
+                        {% if player.get('similarity_score') is not none %}
+                            {{ "%.3f"|format(player.get('similarity_score')) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% for key, value in player.items() %}
+                        {% if key not in ["final_score", "content_score", "similarity_score"] %}
+                            <td>
+                                {% if value is number %}
+                                    {% if 0 <= value <= 1 %}
+                                        {{ (value * 100) | round(0, 'common') | int }}
+                                    {% else %}
+                                        {{ value }}
+                                    {% endif %}
+                                {% else %}
+                                    {{ value }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning" role="alert">
+        No players found matching your criteria. Try changing the filters!
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#playersTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            order: [[0, 'desc']]
+        });
+    });
+</script>
+</body>
+</html>
