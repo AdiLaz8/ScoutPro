@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recommendations - {{ team_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<div class="container">
+    <h1 class="mb-2 text-primary">Recommendations for {{ team_name }}</h1>
+
+    {% if max_budget %}
+        <h5 class="text-muted mb-4">💰 Max Budget: €{{ "{:,.0f}".format(max_budget|float) }}</h5>
+    {% endif %}
+
+    <a href="{{ url_for('select_team') }}" class="btn btn-secondary mb-4">⬅️ Back to Home</a>
+    <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-primary mb-4 ms-2">
+        🔄 Back to Criteria Selection
+    </a>
+
+    <!-- המלצה 1: לעמדה רנדומלית -->
+    <h2 class="text-success mt-5">🔵 Players for Needed Position ({{ selected_position }})</h2>
+    <div class="row">
+        {% for player in position_recommendations %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ player.name|capitalize }}</h5>
+                    <p class="card-text">
+                        <strong>Position:</strong> {{ player.position }}<br>
+                        <strong>Nationality:</strong> {{ player.nationality or 'N/A' }}<br>
+                        <strong>Market Value:</strong>
+                        {% if player['market value in eur'] %}
+                            €{{ "{:,.0f}".format(player['market value in eur']) }}
+                        {% else %}
+                            N/A
+                        {% endif %}<br>
+                        <strong>Similarity Score:</strong>
+                        {% if player.similarity_score is defined %}
+                            {{ "%.3f"|format(player.similarity_score) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                        <br><br>
+                        <strong>Feature Scores:</strong><br>
+                        {% for feature in feature_keys %}
+                            {{ feature|capitalize }}: {{ "%.3f"|format(player.get(feature, 0)) }}<br>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- המלצה 2: לפי לאום מועדף -->
+    <h2 class="text-warning mt-5">🟡 Players from Preferred Nationality</h2>
+    <div class="row">
+        {% for player in nationality_recommendations %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ player.name|capitalize }}</h5>
+                    <p class="card-text">
+                        <strong>Position:</strong> {{ player.position }}<br>
+                        <strong>Nationality:</strong> {{ player.nationality or 'N/A' }}<br>
+                        <strong>Market Value:</strong>
+                        {% if player['market value in eur'] %}
+                            €{{ "{:,.0f}".format(player['market value in eur']) }}
+                        {% else %}
+                            N/A
+                        {% endif %}<br>
+                        <strong>Similarity Score:</strong>
+                        {% if player.similarity_score is defined %}
+                            {{ "%.3f"|format(player.similarity_score) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                        <br><br>
+                        <strong>Feature Scores:</strong><br>
+                        {% for feature in player.component_features %}
+                            {{ feature|capitalize }}: {{ "%.3f"|format(player.get(feature, 0)) }}<br>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- המלצה 3: שחקנים חמים -->
+    <h2 class="text-danger mt-5">🔴 Hottest Players Globally</h2>
+    <div class="row">
+        {% for player in hot_players %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ player.name|capitalize }}</h5>
+                    <p class="card-text">
+                        <strong>Position:</strong> {{ player.position }}<br>
+                        <strong>Nationality:</strong> {{ player.nationality or 'N/A' }}<br>
+                        <strong>Market Value:</strong>
+                        {% if player['market value in eur'] %}
+                            €{{ "{:,.0f}".format(player['market value in eur']) }}
+                        {% else %}
+                            N/A
+                        {% endif %}<br>
+                        <strong>Similarity Score:</strong>
+                        {% if player.similarity_score is defined %}
+                            {{ "%.3f"|format(player.similarity_score) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                        <br><br>
+                        <strong>Feature Scores:</strong><br>
+                        {% for feature in player.component_features %}
+                            {{ feature|capitalize }}: {{ "%.3f"|format(player.get(feature, 0)) }}<br>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
