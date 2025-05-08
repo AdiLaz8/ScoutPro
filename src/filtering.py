@@ -63,13 +63,18 @@ def filter_players_by_criteria(
 
     # רגל מועדפת
     if preferred_foot is not None:
-        if preferred_foot not in ["right", "left"]:
+        preferred_foot = preferred_foot.strip().lower()
+        valid_feet = ["right", "left"]
+        if preferred_foot not in valid_feet:
             raise ValueError("Preferred foot value must be 'right' or 'left'.")
+
+        # Normalize the column too
+        filtered_df['preferred foot'] = filtered_df['preferred foot'].astype(str).str.strip().str.lower()
         filtered_df = filtered_df[filtered_df['preferred foot'] == preferred_foot]
 
     # לאום
     if nationality is not None:
-        filtered_df = filtered_df[filtered_df['country_of_citizenship'] == nationality]
+        filtered_df = filtered_df[filtered_df['country of citizenship'] == nationality]
 
     # חוזה – טווח
     # חוזה – טווח לפי contract expiration year

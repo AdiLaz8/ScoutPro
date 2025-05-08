@@ -20,26 +20,37 @@ def select_team():
     teams = list(main.team_dict.keys())
     return render_template("select_team.html", teams=teams)
 
+
 @app.route("/criteria/<team_name>", methods=["GET", "POST"])
 def select_criteria(team_name):
-    max_budget = session.get("max_budget")
-
     if request.method == "POST":
         form_data = request.form.to_dict()
-        if max_budget:
-            form_data["max_budget"] = max_budget
+
+        # אם המשתמש שינה את התקציב – נעדכן ב-session
+        if form_data.get("max_budget"):
+            try:
+                session["max_budget"] = int(form_data["max_budget"])
+            except ValueError:
+                session["max_budget"] = None
+
         return redirect(url_for('results', team_name=team_name, **form_data))
+
+    # ב־GET – מציגים את התקציב שיש כרגע ב־session
+    max_budget = session.get("max_budget")
 
     positions = sorted(main.final_df['position'].dropna().unique().tolist())
     clubs = sorted(main.final_df['club name'].dropna().unique().tolist())
+    nationalities = sorted(main.final_df['country of citizenship'].dropna().unique().tolist())
 
     return render_template(
         "select_criteria.html",
         team_name=team_name,
         positions=positions,
         clubs=clubs,
-        max_budget=max_budget
+        max_budget=max_budget,
+        nationalities=nationalities  # ⬅️ חדש
     )
+
 
 @app.route("/results/<team_name>")
 def results(team_name):
