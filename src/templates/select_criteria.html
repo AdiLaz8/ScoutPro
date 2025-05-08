@@ -28,14 +28,13 @@
             </select>
         </div>
 
-        <!-- תקציב שעובר מעמוד קודם -->
-        {% if request.args.get("max_budget") %}
-            <div class="mb-3">
-                <label class="form-label">Max Budget (from previous step):</label>
-                <input type="text" class="form-control" value="{{ request.args.get('max_budget') }}" readonly>
-                <input type="hidden" name="max_budget" value="{{ request.args.get('max_budget') }}">
-            </div>
-        {% endif %}
+
+        <div class="mb-3">
+            <label for="max_budget" class="form-label">Max Budget (€):</label>
+            <input type="number" class="form-control" id="max_budget" name="max_budget"
+                   placeholder="Enter max budget" value="{{ max_budget or '' }}">
+        </div>
+
 
         <!-- גיל -->
         <div class="mb-4">
@@ -92,10 +91,17 @@
             </div>
         </div>
 
+
         <div class="mb-3">
             <label for="nationality" class="form-label">Nationality:</label>
-            <input type="text" class="form-control" name="nationality" id="nationality">
+            <select name="nationality" id="nationality" class="form-select">
+                <option value="">-- Any --</option>
+                {% for nation in nationalities %}
+                    <option value="{{ nation }}">{{ nation }}</option>
+                {% endfor %}
+            </select>
         </div>
+
 
         <hr>
 
