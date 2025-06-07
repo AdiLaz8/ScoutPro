@@ -121,3 +121,26 @@ def create_teams_positions_dict(df):
         teams_dict[team][position].extend(group.to_dict('records'))  
     return teams_dict
 
+def process_and_merge_transfers(transfers_path: str, final_df: pd.DataFrame) -> pd.DataFrame:
+    df_transfers = pd.read_csv(transfers_path)
+    
+    # שמירה רק על העמודות הרלוונטיות
+    required_cols = ['transfer_season', 'from_club_name', 'to_club_name', 'transfer_fee', 'player_name']
+    df_transfers = df_transfers.dropna(subset=required_cols)
+    df_transfers = df_transfers[required_cols]
+
+    # סינון לפי עונות רלוונטיות
+    valid_seasons = {'19/20', '20/21', '21/22', '22/23', '23/24', '24/25'}
+    df_transfers = df_transfers[df_transfers['transfer_season'].isin(valid_seasons)]
+
+    # הסרת שחקנים שלא עברו לקבוצה פעילה (ולא פרשו)
+    df_transfers = df_transfers[~df_transfers['to_club_name'].isin(['Retired', 'Without Club'])]
+
+    # אחידות בשמות
+    df_transfers['player_name'] = df_transfers['player_name'].str.strip().str.lower()
+    final_df['name'] = final_df['name'].str.strip().str.lower()
+
+    # מיזוג עם טבלת השחקנים כדי להוסיף תכונות
+    merged_transfers = pd.merge(df_transfers, final_df, left_on='player_name', right_on='name', how='inner')
+
+    return merged_transfers
