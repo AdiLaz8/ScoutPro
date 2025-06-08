@@ -21,11 +21,13 @@ merged_df = processing.merge_players_and_attributes(players_df, attributes_df)
 player_stats_df = processing.summarize_player_statistics(get_relative_path('appearances.csv'))
 final_df = processing.merge_with_appearances(merged_df, player_stats_df)
 
+
 # שלב 2: חישוב ציוני התאמה
 scored_df = score.add_scores_to_dataframe(final_df)
 scored_df["base_score"] = scored_df.apply(lambda row: score.compute_content_score(row, row["position"]), axis=1)
 scored_df["bonus_score"] = scored_df.apply(lambda row: score.compute_bonus(row, row["position"]), axis=1)
 scored_df["rounded_score"] = scored_df["content_score"].round(2)
+merged_transfers_df = processing.process_and_merge_transfers(get_relative_path('transfers.csv'), scored_df)
 
 # # הדפסת טופ שחקנים כלליים
 # print("\nשחקנים עם ציוני ההתאמה הכי גבוהים (כולל בסיס ובונוס):")
@@ -69,13 +71,13 @@ else:
         top_n=40
     )
 
-    # הדפסת המועמדים המובילים לפי content_score
-    print(f"\n🧠 Top 20 recommended candidates for {team_name} in position {position}:")
-    print("עמודות ב־recommended_df:", recommended_df.columns.tolist())
+    # # הדפסת המועמדים המובילים לפי content_score
+    # print(f"\n🧠 Top 20 recommended candidates for {team_name} in position {position}:")
+    # print("עמודות ב־recommended_df:", recommended_df.columns.tolist())
 
-    print(recommended_df.sort_values(by="content_score", ascending=False)[
-        ["name", "position", "content_score", "cluster", "cluster_center_distance"]
-    ].head(40).to_string(index=False))
+    # print(recommended_df.sort_values(by="content_score", ascending=False)[
+    #     ["name", "position", "content_score", "cluster", "cluster_center_distance"]
+    # ].head(40).to_string(index=False))
 
     
 # # גרף PCA של תוצאות ה־KMeans
@@ -107,7 +109,16 @@ recommended_df = score.combine_similarity_and_content_score(recommended_df, alph
 # שלב 3: מיון לפי ציון סופי וסינון לטופ 20
 top_20 = recommended_df.sort_values(by="final_score", ascending=False).head(20)
 
-# הדפסת התוצאה
-print(f"\n🔝 Top 20 combined recommendations for {team_name} - position {position}:")
-print(top_20[["name", "position", "content_score", "similarity_score", "final_score"]].to_string(index=False))
+# # הדפסת התוצאה
+# print(f"\n🔝 Top 20 combined recommendations for {team_name} - position {position}:")
+# print(top_20[["name", "position", "content_score", "similarity_score", "final_score"]].to_string(index=False))
 
+print("\n✅ Transfer table successfully merged with player attributes.")
+print(f"Number of rows after filtering and merging: {len(merged_transfers_df)}")
+print("Columns in the merged table:", merged_transfers_df.columns.tolist())
+
+print("\n🔍 Sample rows from the merged dataset:")
+print(merged_transfers_df[[
+    'player_name', 'to_club_name', 'transfer_season', 'transfer_fee',
+    'position', 'content_score'
+]].head(10).to_string(index=False))
