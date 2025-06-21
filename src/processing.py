@@ -73,6 +73,8 @@ def filter_and_process_players(file_path):
     ]
 
     return df_selected
+
+
 def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.DataFrame) -> pd.DataFrame:
 
     players_df["name"] = players_df["name"].str.strip().str.lower()
@@ -101,7 +103,7 @@ def merge_with_appearances(merged_df: pd.DataFrame, appearances_df: pd.DataFrame
     merged_full = pd.merge(merged_df, appearances_df, on="player_id", how="left")
     merged_full["goals"] = merged_full["goals"].fillna(0).astype(int)
     merged_full["assists"] = merged_full["assists"].fillna(0).astype(int)
-    merged_full=merged_full.drop(columns=["player_id"])
+    merged_full = merged_full.drop(columns=["player_id"])
     if "final_position" in merged_full.columns:
         merged_full = merged_full.rename(columns={"final_position": "position"})
     merged_full = merged_full.rename(columns={"current club name": "club name"})
@@ -120,6 +122,8 @@ def create_teams_positions_dict(df):
             teams_dict[team][position] = []
         teams_dict[team][position].extend(group.to_dict('records'))  
     return teams_dict
+
+# TODO: Club names in transfers_df (from/to_club_name) may be different than in final_df (club_name).
 
 def process_and_merge_transfers(transfers_path: str, final_df: pd.DataFrame) -> pd.DataFrame:
     df_transfers = pd.read_csv(transfers_path)
@@ -142,5 +146,7 @@ def process_and_merge_transfers(transfers_path: str, final_df: pd.DataFrame) -> 
 
     # מיזוג עם טבלת השחקנים כדי להוסיף תכונות
     merged_transfers = pd.merge(df_transfers, final_df, left_on='player_name', right_on='name', how='inner')
+    merged_transfers = merged_transfers.drop(columns=['player_name'])
 
     return merged_transfers
+
