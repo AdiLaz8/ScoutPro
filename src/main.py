@@ -157,14 +157,14 @@ players_info = tfidf_processing.tokenize_per_player(final_df_for_tokenizing)
 print("\nTokenizing is done!")
 
 print("\nApplying TF-IDF and computing similarity between teams and players...")
-similarity_df = tfidf_processing.compute_tfidf_and_similarity(teams_info, players_info)
+curr_similarity_df = tfidf_processing.compute_tfidf_and_similarity(teams_info, players_info)
 # print("Sample from similarity matrix:\n")
 # print(similarity_df.head(5).iloc[:, :5])
 
 team_name = 'Juventus Football Club'
 position = 'LW'
 print(f"\nGetting 5 most similar {position} players for team {team_name}, based on current teams:")
-top = tfidf_processing.get_top_k_similar_players(team_name, similarity_df, final_df_for_tokenizing, position)
+top = tfidf_processing.get_top_k_similar_players(team_name, curr_similarity_df, final_df_for_tokenizing, position)
 print(top.to_string(index=False))
 
 ### Case II: Vectorize based on teams' lately-transferred players ###
@@ -184,15 +184,24 @@ teams_info_transfers = tfidf_processing.tokenize_per_team(transfers_df_for_token
 print("\nTokenizing is done!")
 
 print("\nApplying TF-IDF and computing similarity between teams and players...")
-similarity_df = tfidf_processing.compute_tfidf_and_similarity(teams_info_transfers, players_info)
+transfers_similarity_df = tfidf_processing.compute_tfidf_and_similarity(teams_info_transfers, players_info)
 # print("Sample from similarity matrix:\n")
 # print(similarity_df.head(5).iloc[:, :5])
 
 team_name = 'Juventus'
 position = 'LW'
 print(f"\nGetting 5 most similar {position} players for team {team_name}, based on transfers:")
-top = tfidf_processing.get_top_k_similar_players(team_name, similarity_df, final_df_for_tokenizing, position)
+top = tfidf_processing.get_top_k_similar_players(team_name, transfers_similarity_df, final_df_for_tokenizing, position)
 print(top.to_string(index=False))
+
+### For computing with alpha adjustment: ###
+# alpha = anything between 0 to 1
+# hybrid_similarity_df = tfidf_processing.adjust_alpha_to_similarity(curr_similarity_df, transfers_similarity_df, alpha)
+# Choose team_name and position
+# print(f"\nGetting 5 most similar {position} players for team {team_name}, hybrid score:")
+# top = tfidf_processing.get_top_k_similar_players(team_name, hybrid_similarity_df, final_df_for_tokenizing, position)
+# print(top.to_string(index=False))
+
 
 # TODO: Problematic example: Ajax, RB - Gave a player from AFC Ajax Amsterdam (same team, different names)
 # Club names must be uniform!
