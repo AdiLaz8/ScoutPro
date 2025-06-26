@@ -2,13 +2,13 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+
 def prepare_values_for_tokenizing(final: pd.DataFrame) -> pd.DataFrame:
     """For a given dataframe of players, sanitize and prepare the attributes' names and values for tokenizing."""
 
     # Use a copy of the dataframe so we won't manipulate the original.
     final_for_token = final.copy()
 
-    # TODO: Check problems with 'goals', 'assists', 'transfer_fee'!!!
     # Standardize the columns' names and drop columns you don't need
     final_for_token.columns = [col.replace(' ', '_') for col in final_for_token.columns]
     to_remove = {'transfer_season', 'from_club_name', 'contract_expiration_year', 'goals', 'assists', 'transfer_fee'}
@@ -129,9 +129,16 @@ def compute_tfidf_and_similarity(teams_info: dict[str, str], players_info: dict[
     similarity_df = pd.DataFrame(similarity_mat, index=team_names, columns=player_names)
     return similarity_df
 
+
 def adjust_alpha_to_similarity(curr_team_similarity: pd.DataFrame, transfers_similarity: pd.DataFrame, alpha: int = 0.5) -> pd.DataFrame:
+    """
+    Given an alpha between 0 and 1, return for each team and player: alpha * curr_team_similarity + (1-alpha) * transfers_similarity,
+    when curr_team_similarity is the cosine similarity score based on the current teams, and transfers_similarity is the cosine similarity
+    score based on team transfers.
+    """
     hybrid_similarity_df =  alpha * curr_team_similarity + (1 - alpha) * transfers_similarity
     return hybrid_similarity_df
+
 
 def get_top_k_similar_players(team_name: str, similarity_df: pd.DataFrame, final_df: pd.DataFrame, position: str, k: int = 5) -> pd.DataFrame:
     """
