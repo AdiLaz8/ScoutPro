@@ -56,11 +56,14 @@ def filter_and_process_players(file_path):
         'contract_expiration_date',
         'current_club_name',
         'market_value_in_eur',
+        'current_club_id',
         'highest_market_value_in_eur'
     ]
     df_selected = df_filtered[columns_of_interest].copy()
+
     for column in columns_of_interest:
         df_selected = df_selected.dropna(subset=[column])
+
     df_selected.loc[:, "contract_expiration_date"] = pd.to_datetime(
         df_selected["contract_expiration_date"], errors="coerce"
     )
@@ -68,11 +71,15 @@ def filter_and_process_players(file_path):
         lambda x: x.year if pd.notnull(x) else None
     )
     df_selected = df_selected.drop(columns=["contract_expiration_date"])
+
+    # תיקון ברור: שמור את השם של העמודות הקריטיות
     df_selected.columns = [
-        col if col == 'player_id' else col.replace("_", " ") for col in df_selected.columns
+        col if col in ['player_id', 'current_club_id'] else col.replace("_", " ") 
+        for col in df_selected.columns
     ]
 
     return df_selected
+
 
 
 def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.DataFrame) -> pd.DataFrame:
@@ -99,16 +106,27 @@ def summarize_player_statistics(file_path):
     return summary_df
 
 def merge_with_appearances(merged_df: pd.DataFrame, appearances_df: pd.DataFrame) -> pd.DataFrame:
-
     merged_full = pd.merge(merged_df, appearances_df, on="player_id", how="left")
     merged_full["goals"] = merged_full["goals"].fillna(0).astype(int)
     merged_full["assists"] = merged_full["assists"].fillna(0).astype(int)
-    merged_full = merged_full.drop(columns=["player_id"])
+
     if "final_position" in merged_full.columns:
         merged_full = merged_full.rename(columns={"final_position": "position"})
+
+    # Rename before dropping 'player_id' to avoid mistakes
     merged_full = merged_full.rename(columns={"current club name": "club name"})
-    merged_full.columns = [col.replace("_", " ") for col in merged_full.columns]
+
+    # Keep 'current_club_id' and 'player_id' explicitly and rename others
+    merged_full.columns = [
+        col if col in ["player_id", "current_club_id"] else col.replace("_", " ")
+        for col in merged_full.columns
+    ]
+
+    # Drop only after safely renaming columns
+    merged_full = merged_full.drop(columns=["player_id"])
+
     return merged_full
+
 
 def create_teams_positions_dict(df):
     if not {'club name', 'position'}.issubset(df.columns):
@@ -129,7 +147,7 @@ def process_and_merge_transfers(transfers_path: str, final_df: pd.DataFrame) -> 
     df_transfers = pd.read_csv(transfers_path)
     
     # שמירה רק על העמודות הרלוונטיות
-    required_cols = ['transfer_season', 'from_club_name', 'to_club_name', 'transfer_fee', 'player_name']
+    required_cols = ['transfer_season', 'from_club_name', 'to_club_name', 'to_club_id', 'transfer_fee', 'player_name']
     df_transfers = df_transfers.dropna(subset=required_cols)
     df_transfers = df_transfers[required_cols]
 
@@ -145,8 +163,21 @@ def process_and_merge_transfers(transfers_path: str, final_df: pd.DataFrame) -> 
     final_df['name'] = final_df['name'].str.strip().str.lower()
 
     # מיזוג עם טבלת השחקנים כדי להוסיף תכונות
-    merged_transfers = pd.merge(df_transfers, final_df, left_on='player_name', right_on='name', how='inner')
-    merged_transfers = merged_transfers.drop(columns=['player_name'])
+    # מיזוג עם טבלת השחקנים גם לפי שם וגם לפי club id
+    merged_transfers = pd.merge(
+        df_transfers,
+        final_df,
+        left_on=['player_name', 'to_club_id'],
+        right_on=['name', 'current_club_id'],
+        how='inner'
+    )
+    # שינוי שם הקבוצה לפי מה שכתוב ב־final_df
+    merged_transfers = merged_transfers.drop(columns=["club name"])
+    merged_transfers['to_club_name'] = final_df['club name']
+
+    # הסרת עמודות כפולות ומיותרות
+    merged_transfers = merged_transfers.drop(columns=['player_name', 'current_club_id'])
+    # merged_transfers = pd.merge(df_transfers, final_df, left_on='player_name', right_on='name', how='inner')
+    # merged_transfers = merged_transfers.drop(columns=['player_name'])
 
     return merged_transfers
-
