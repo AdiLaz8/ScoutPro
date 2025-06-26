@@ -25,7 +25,6 @@ print("final_df columns:", list(final_df.columns))
 print("merged_transfers_df columns:", list(merged_transfers_df.columns))
 
 
-### Relevant from here ###
 print("\n✅ Transfer table successfully merged with player attributes.")
 print(f"Number of rows after filtering and merging: {len(merged_transfers_df)}")
 
@@ -93,14 +92,13 @@ transfers_similarity_df = tfidf_processing.compute_tfidf_and_similarity(teams_in
 # print("Sample from similarity matrix:\n")
 # print(similarity_df.head(5).iloc[:, :5])
 
-team_name = 'Juventus Football Club'
-position = 'LW'
-# print(f"\nGetting 5 most similar {position} players for team {team_name}, based on transfers:")
-# top = tfidf_processing.get_top_k_similar_players(team_name, similarity_df, final_df_for_tokenizing, position)
-# print(top.to_string(index=False))
+
+print(f"\nGetting 5 most similar {position} players for team {team_name}, based on transfers:")
+top = tfidf_processing.get_top_k_similar_players(team_name, transfers_similarity_df, final_df_for_tokenizing, position)
+print(top.to_string(index=False))
 
 ### For computing with alpha adjustment: ###
-alpha = 0.3
+alpha = 0.5
 hybrid_similarity_df = tfidf_processing.adjust_alpha_to_similarity(similarity_df, transfers_similarity_df, alpha)
 # Choose team_name and position
 print(f"\nGetting 5 most similar {position} players for team {team_name}, hybrid score:")
