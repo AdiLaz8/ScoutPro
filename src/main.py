@@ -3,8 +3,6 @@ import pandas as pd
 import json
 import processing
 import tfidf_processing
-import score
-import kmeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt

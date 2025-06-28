@@ -5,7 +5,6 @@ from typing import Optional
 
 import main                    # final_df טעון כאן
 import tfidf_processing        # כל פונקציות TF-IDF שלך
-import score                   # compute_final_content_score  וכו'
 
 # -----------------------------------------------------------
 # ①  חישוב TF-IDF  וסימילריות (hybrid)

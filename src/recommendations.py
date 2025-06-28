@@ -1,8 +1,6 @@
 import pandas as pd
 import main
 import random
-import kmeans
-import score
 
 # זיכרון – שחקנים לפי לאום ושחקנים חמים (נשמר לפי קבוצה ותקציב)
 _recommendation_cache = {}
