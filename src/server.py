@@ -9,21 +9,17 @@ app.secret_key = "your_secret_key_here"
 
 @app.route("/", methods=["GET", "POST"])
 def select_team():
-    teams = list(main.team_dict.keys())
-    error = None
     if request.method == "POST":
         team_name = request.form.get("team_name")
-        action = request.form.get("action")
-        if not team_name:
-            error = "Please select a team first."
-            return render_template("select_team.html", teams=teams, error=error)
         session['team_name'] = team_name
         session['selected_filters'] = {}  # reset filters on team change
+        action = request.form.get("action")
         if action == "filters":
             return redirect(url_for('select_criteria', team_name=team_name))
         elif action == "recs":
             return redirect(url_for('recommendations_page', team_name=team_name))
-    return render_template("select_team.html", teams=teams, error=error)
+    teams = list(main.team_dict.keys())
+    return render_template("select_team.html", teams=teams)
 
 @app.route("/criteria/<team_name>", methods=["GET", "POST"])
 def select_criteria(team_name):
@@ -77,21 +73,21 @@ def results(team_name):
         "weak_foot": parse_param("weak_foot", int),
         "min_final_score": parse_param("min_final_score", float)
     }
-    # Save latest filters to session for 'back'
     session["selected_filters"] = {k: v for k, v in criteria.items() if v is not None}
 
     try:
         filtered_players = filtering.filter_players_by_criteria(**criteria)
-
         if filtered_players.empty:
             return render_template("results.html", players=[], team_name=team_name, position=position)
-
+        # אל תציג שחקני הקבוצה
+        filtered_players = filtered_players[filtered_players['club name'] != team_name]
+        # הוסף קישור לויקיפדיה
+        from recommendations import add_wikipedia_links
+        filtered_players = add_wikipedia_links(filtered_players)
         players = []
         for _, row in filtered_players.iterrows():
             player = row.to_dict()
-            player['similarity_score'] = row.get('similarity_score', 0)
             players.append(player)
-
     except Exception as e:
         return f"Error filtering players: {str(e)}", 500
 
@@ -100,13 +96,16 @@ def results(team_name):
 @app.route("/recommendations/<team_name>")
 def recommendations_page(team_name):
     max_budget = session.get("max_budget")
-    try:
-        pos_recs, nat_recs, hot_recs, selected_position = recommendations.get_recommendations_tfidf(
-            team_name=team_name,
-            max_budget=int(max_budget) if max_budget else None
-        )
-    except ValueError as e:
-        return str(e), 404
+    (
+        pos_recs, nat_recs, hot_recs, selected_position,
+        prospects, expiring, top_nationality
+    ) = recommendations.get_recommendations_tfidf(
+        team_name=team_name,
+        max_budget=int(max_budget) if max_budget else None
+    )
+    # גרפים
+    nationality_counts = pos_recs['country of citizenship'].value_counts().to_dict()
+    position_counts = pos_recs['position'].value_counts().to_dict()
 
     return render_template(
         "recommendations.html",
@@ -115,7 +114,12 @@ def recommendations_page(team_name):
         selected_position=selected_position,
         position_recommendations=pos_recs.to_dict(orient="records"),
         nationality_recommendations=nat_recs.to_dict(orient="records"),
-        hot_players=hot_recs.to_dict(orient="records")
+        hot_players=hot_recs.to_dict(orient="records"),
+        prospects=prospects.to_dict(orient="records"),
+        expiring=expiring.to_dict(orient="records"),
+        nationality_counts=nationality_counts,
+        position_counts=position_counts,
+        top_nationality=top_nationality
     )
 
 if __name__ == "__main__":

@@ -3,49 +3,54 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>ScoutPro | Results</title>
+    <title>ScoutPro | Player Search Results</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        body { background: #f6f8fa; }
+        .badge { font-size: 90%; }
+    </style>
 </head>
-<body class="p-4" style="background: #f6f8fa;">
+<body class="p-4">
 <div class="container">
-    <h1 class="mb-4 text-primary text-center">Results for {{ team_name }} (Position: {{ position }})</h1>
-    <div class="d-flex justify-content-start mb-4 gap-2">
-        <a href="{{ url_for('recommendations_page', team_name=team_name) }}" class="btn btn-outline-success">
-            Smart Recommendations
-        </a>
-        <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-secondary">
-            ⬅️ Back to Filters
-        </a>
-    </div>
+    <h1 class="mb-4 text-primary text-center">Player Search Results for {{ team_name }} (Position: {{ position }})</h1>
+    <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-secondary mb-4">⬅️ Back to Filters</a>
+    <a href="{{ url_for('recommendations_page', team_name=team_name) }}" class="btn btn-success mb-4 ms-2">Smart Recommendations</a>
     {% if players %}
-    <div class="table-responsive">
-        <table id="playersTable" class="table table-striped table-bordered table-hover align-middle">
+    <div class="table-responsive" style="overflow-x:auto;">
+        <table class="table table-striped table-bordered table-hover align-middle">
             <thead class="table-primary">
                 <tr>
-                    <th>Similarity Score</th>
-                    {% for key in players[0].keys() %}
-                        {% if key not in ["similarity_score"] %}
-                            <th>{{ key.replace("_", " ").title() }}</th>
+                    {% for col in players[0].keys() %}
+                        {% if col == "age" %}
+                            <th>Age</th>
+                            <th>Wikipedia</th>
+                        {% elif col != "wikipedia_url" %}
+                            <th>{{ col.replace("_", " ").title() }}</th>
                         {% endif %}
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for player in players %}
+                {% for p in players %}
                 <tr>
-                    <td>
-                        {% if player.get('similarity_score') is not none %}
-                            {{ "%.3f"|format(player.get('similarity_score')) }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    {% for key, value in player.items() %}
-                        {% if key not in ["similarity_score"] %}
+                    {% for k,v in p.items() %}
+                        {% if k == "age" %}
                             <td>
-                                {{ value }}
+                                {{ v }}
+                                {% if v|int <= 21 %}
+                                    <span class="badge bg-info ms-1">U21</span>
+                                {% endif %}
                             </td>
+                            <td><a href="{{ p['wikipedia_url'] }}" target="_blank">Wikipedia</a></td>
+                        {% elif k == "contract expiration year" %}
+                            <td>
+                                {{ v }}
+                                {% if v|int <= 2026 %}
+                                    <span class="badge bg-warning ms-1">Expiring</span>
+                                {% endif %}
+                            </td>
+                        {% elif k != "wikipedia_url" %}
+                            <td>{{ v }}</td>
                         {% endif %}
                     {% endfor %}
                 </tr>
@@ -55,22 +60,9 @@
     </div>
     {% else %}
     <div class="alert alert-warning" role="alert">
-        No players matched your filters. Try changing the filters!
+        No players found matching your criteria. Try different filters!
     </div>
     {% endif %}
 </div>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#playersTable').DataTable({
-            paging: true,
-            searching: true,
-            ordering: true,
-            order: [[0, 'desc']]
-        });
-    });
-</script>
 </body>
 </html>

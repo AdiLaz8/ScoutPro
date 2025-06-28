@@ -14,9 +14,6 @@
 <div class="container d-flex justify-content-center align-items-center vh-100">
     <div class="card p-5" style="min-width:340px; max-width:420px;">
         <h2 class="mb-4 text-center text-primary">Select Your Team</h2>
-        {% if error %}
-            <div class="alert alert-danger text-center">{{ error }}</div>
-        {% endif %}
         <form method="post" id="teamForm">
             <div class="mb-3">
                 <label for="team_name" class="form-label fw-bold">Team</label>
@@ -28,11 +25,29 @@
                 </select>
             </div>
             <div class="d-grid gap-3 mt-4">
-                <button type="submit" name="action" value="filters" class="btn btn-primary btn-lg" id="toFiltersBtn">Player Search (Filters)</button>
-                <button type="submit" name="action" value="recs" class="btn btn-success btn-lg" id="toRecsBtn">Smart Recommendations</button>
+                <button type="submit" class="btn btn-primary btn-lg" id="toFiltersBtn" name="action" value="filters">Player Search (Filters)</button>
+                <button type="button" class="btn btn-success btn-lg" id="toRecsBtn">Smart Recommendations</button>
             </div>
         </form>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const teamForm = document.getElementById('teamForm');
+        const toRecsBtn = document.getElementById('toRecsBtn');
+        const teamSelect = document.getElementById('team_name');
+
+        // Smart Recommendations: redirect JS
+        toRecsBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const teamName = teamSelect.value;
+            if (!teamName) {
+                alert('Please select a team first.');
+                return;
+            }
+            window.location.href = "/recommendations/" + encodeURIComponent(teamName);
+        });
+    });
+</script>
 </body>
 </html>
