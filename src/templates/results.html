@@ -1,68 +1,105 @@
-<!-- templates/results.html -->
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ScoutPro | Player Search Results</title>
+    <title>ScoutPro | Search Results</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/svgs/solid/futbol.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        body { background: #f6f8fa; }
+        body { background: linear-gradient(120deg, #f5faff 0%, #e0e7ff 100%); }
+        .main-logo { width: 48px; height: 48px; position: absolute; top: 16px; left: 28px; filter: drop-shadow(0 4px 8px #0002); z-index: 10;}
+        .table-responsive { border-radius: 22px; box-shadow: 0 4px 16px #0001;}
+        .table tbody tr:hover { background-color: #f1f7ff !important; transition: background 0.3s;}
+        .btn, .form-select { border-radius: 12px !important; }
         .badge { font-size: 90%; }
     </style>
 </head>
 <body class="p-4">
-<div class="container">
-    <h1 class="mb-4 text-primary text-center">Player Search Results for {{ team_name }} (Position: {{ position }})</h1>
-    <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-secondary mb-4">⬅️ Back to Filters</a>
-    <a href="{{ url_for('recommendations_page', team_name=team_name) }}" class="btn btn-success mb-4 ms-2">Smart Recommendations</a>
-    {% if players %}
-    <div class="table-responsive" style="overflow-x:auto;">
-        <table class="table table-striped table-bordered table-hover align-middle">
-            <thead class="table-primary">
+<img class="main-logo animate__animated animate__bounceIn" src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/svgs/solid/futbol.svg" alt="ScoutPro Logo">
+<div class="container animate__animated animate__fadeIn">
+    <h1 class="mb-4 text-primary text-center animate__animated animate__fadeInDown">Player Search Results for {{ team_name }} ({{ position }})</h1>
+    <div class="d-flex mb-4 gap-2">
+        <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-secondary">⬅️ Back to Filters</a>
+        <a href="{{ url_for('recommendations_page', team_name=team_name) }}" class="btn btn-success">Smart Recommendations</a>
+    </div>
+    <div class="table-responsive animate__animated animate__fadeInUp">
+        <table class="table table-striped table-bordered align-middle">
+            <thead>
                 <tr>
-                    {% for col in players[0].keys() %}
-                        {% if col == "age" %}
-                            <th>Age</th>
-                            <th>Wikipedia</th>
-                        {% elif col != "wikipedia_url" %}
-                            <th>{{ col.replace("_", " ").title() }}</th>
-                        {% endif %}
-                    {% endfor %}
+                    <th>Name</th>
+                    <th>Club</th>
+                    <th>Nationality</th>
+                    <th>Position</th>
+                    <th>Age</th>
+                    <th>Wikipedia</th>
+                    <th>Contract Expiration</th>
+                    <th>Similarity</th>
+                    <th>Market Value</th>
+                    <th>Height</th>
+                    <th>Preferred Foot</th>
+                    <th>Skill Moves</th>
+                    <th>Weak Foot</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <!-- כל שאר העמודות שרוצה -->
                 </tr>
             </thead>
             <tbody>
-                {% for p in players %}
+            {% for p in players %}
                 <tr>
-                    {% for k,v in p.items() %}
-                        {% if k == "age" %}
-                            <td>
-                                {{ v }}
-                                {% if v|int <= 21 %}
-                                    <span class="badge bg-info ms-1">U21</span>
-                                {% endif %}
-                            </td>
-                            <td><a href="{{ p['wikipedia_url'] }}" target="_blank">Wikipedia</a></td>
-                        {% elif k == "contract expiration year" %}
-                            <td>
-                                {{ v }}
-                                {% if v|int <= 2026 %}
-                                    <span class="badge bg-warning ms-1">Expiring</span>
-                                {% endif %}
-                            </td>
-                        {% elif k != "wikipedia_url" %}
-                            <td>{{ v }}</td>
+                    <td>{{ p['name'] }}</td>
+                    <td>{{ p['club name'] }}</td>
+                    <td>{{ p['country of citizenship'] }}</td>
+                    <td>{{ p['position'] }}</td>
+                    <td>
+                        {{ p['age'] }}
+                        {% if p['age']|int <= 21 %}
+                            <span class="badge bg-info ms-1" data-bs-toggle="tooltip" title="Under 21">U21</span>
                         {% endif %}
-                    {% endfor %}
+                    </td>
+                    <td><a href="{{ p['wikipedia_url'] }}" target="_blank" class="btn btn-sm btn-outline-secondary">Wikipedia</a></td>
+                    <td>
+                        {{ p['contract expiration year'] }}
+                        {% if p['contract expiration year']|int <= 2026 %}
+                            <span class="badge bg-warning ms-1" data-bs-toggle="tooltip" title="Expiring">Expiring</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
+                    <td>{{ p['market value in eur'] }}</td>
+                    <td>{{ p['height in cm'] }}</td>
+                    <td>{{ p['preferred foot'] }}</td>
+                    <td>{{ p['skill moves'] }}</td>
+                    <td>{{ p['weak foot'] }}</td>
+                    <td>{{ p['goals'] }}</td>
+                    <td>{{ p['assists'] }}</td>
                 </tr>
-                {% endfor %}
+            {% endfor %}
             </tbody>
         </table>
     </div>
-    {% else %}
-    <div class="alert alert-warning" role="alert">
-        No players found matching your criteria. Try different filters!
+    <!-- Pie Chart -->
+    <div class="row mt-4 mb-3 animate__animated animate__fadeIn">
+        <div class="col-md-6 mx-auto">
+            <canvas id="nationalityChart"></canvas>
+        </div>
     </div>
-    {% endif %}
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Chart + Tooltips
+    const nationalityData = {{ nationality_counts|tojson }};
+    const natLabels = Object.keys(nationalityData);
+    const natValues = Object.values(nationalityData);
+    new Chart(document.getElementById('nationalityChart'), {
+        type: 'pie',
+        data: { labels: natLabels, datasets: [{ data: natValues, backgroundColor: ['#62b6cb', '#bdb2ff', '#ffd6a5', '#b5ead7', '#ffb4a2', '#ffafcc', '#98f5e1'] }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+    // Enable all tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
+</script>
 </body>
 </html>

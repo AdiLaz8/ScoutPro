@@ -1,200 +1,276 @@
-<!-- templates/recommendations.html -->
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>ScoutPro | Smart Recommendations</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/svgs/solid/futbol.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: #f6f8fa; }
-        .badge { font-size: 90%; }
+        body { background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);}
+        .main-logo { width: 50px; position: absolute; top: 16px; left: 32px; }
+        .card { border-radius: 18px; box-shadow: 0 8px 32px #0002; margin-bottom: 24px;}
+        .prospect-badge { background: #28d; color: #fff; border-radius: 7px; padding: 2px 7px; font-size: 0.83em; margin-left: 2px; }
+        .expiring-badge { background: #fa8c16; color: #fff; border-radius: 7px; padding: 2px 7px; font-size: 0.83em; margin-left: 2px;}
+        .table th, .table td { vertical-align: middle; }
+        .table a { color: #2563eb; text-decoration: underline; }
+        .table thead { background: #eff6ff; }
+        .animate__fadeIn { animation: fadeIn 0.6s;}
+        .btn-link { border: none; background: none; color: #1994f5; text-decoration: underline;}
     </style>
 </head>
-<body class="p-4">
-<div class="container">
-    <h1 class="mb-4 text-primary text-center">Smart Recommendations for {{ team_name }}</h1>
-    <a href="{{ url_for('select_team') }}" class="btn btn-secondary mb-4">⬅️ Back to Team Selection</a>
-    <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-primary mb-4 ms-2">Player Search (Filters)</a>
-    <h3 class="mt-4">Top Players for Position: {{ selected_position }}</h3>
-    <div class="table-responsive" style="overflow-x:auto;">
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Club</th>
-                    <th>Nationality</th>
-                    <th>Position</th>
-                    <th>Age</th>
-                    <th>Contract Expiration</th>
-                    <th>Similarity</th>
-                    <th>Wikipedia</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for p in position_recommendations %}
-                <tr>
-                    <td>{{ p['name'] }}</td>
-                    <td>{{ p['club name'] }}</td>
-                    <td>{{ p['country of citizenship'] }}</td>
-                    <td>{{ p['position'] }}</td>
-                    <td>
-                        {{ p['age'] }}
-                        {% if p['age']|int <= 21 %}
-                            <span class="badge bg-info ms-1">U21</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {{ p['contract expiration year'] }}
-                        {% if p['contract expiration year']|int <= 2026 %}
-                            <span class="badge bg-warning ms-1">Expiring</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                    <td><a href="{{ p['wikipedia_url'] }}" target="_blank">Wikipedia</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<body>
+    <img class="main-logo animate__animated animate__tada" src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/svgs/solid/futbol.svg" alt="ScoutPro Logo">
+    <div class="container py-4">
+        <a href="{{ url_for('select_team') }}" class="btn btn-outline-secondary mb-3">← Back to Team Selection</a>
+        <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-outline-primary mb-3 ms-2">Player Search (Filters)</a>
+        <h1 class="mb-3 text-primary text-center animate__fadeInDown">Smart Recommendations for {{ team_name }}</h1>
+        <h4 class="text-center mb-4">Best by Position: <span class="text-info">{{ selected_position }}</span></h4>
+        
+        <!-- Main table: by position -->
+        <div class="card p-3 animate__fadeIn">
+            <h5 class="mb-2">Top {{ selected_position }} Recommendations</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Wikipedia</th>
+                            <th>Club</th>
+                            <th>Country</th>
+                            <th>Position</th>
+                            <th>Market Value (€)</th>
+                            <th>Similarity</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in position_recommendations %}
+                        <tr>
+                            <td>
+                                {{ p['name'] }}
+                                {% if p['age'] <= 21 %}
+                                    <span class="prospect-badge">U21</span>
+                                {% endif %}
+                                {% if p.get('contract expiration year') and p['contract expiration year'] <= 2026 %}
+                                    <span class="expiring-badge">Expiring</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ p['age'] }}</td>
+                            <td>
+                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
+                            </td>
+                            <td>{{ p['club name'] }}</td>
+                            <td>{{ p['country of citizenship'] }}</td>
+                            <td>{{ p['position'] }}</td>
+                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
+                            <td>
+                                <a href="{{ p['wikipedia_url'] }}" target="_blank" class="btn-link">Profile</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <!-- Nationality Chart -->
-    <div class="row mt-4 mb-3">
-        <div class="col-md-6 mx-auto">
-            <canvas id="nationalityChart"></canvas>
+        <!-- Nationality Pie Chart under main table, much smaller -->
+        <div class="mb-4 d-flex justify-content-center">
+            <canvas id="nationalityChart" width="800" height="800" style="max-width:800px; max-height:800px;"></canvas>
+        </div>
+
+
+        <!-- By nationality -->
+        <div class="card p-3 animate__fadeIn">
+            <h5 class="mb-2">Top {{ top_nationality }} Players</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Wikipedia</th>
+                            <th>Club</th>
+                            <th>Position</th>
+                            <th>Market Value (€)</th>
+                            <th>Similarity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in nationality_recommendations %}
+                        <tr>
+                            <td>
+                                {{ p['name'] }}
+                                {% if p['age'] <= 21 %}
+                                    <span class="prospect-badge">U21</span>
+                                {% endif %}
+                                {% if p.get('contract expiration year') and p['contract expiration year'] <= 2026 %}
+                                    <span class="expiring-badge">Expiring</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ p['age'] }}</td>
+                            <td>
+                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
+                            </td>
+                            <td>{{ p['club name'] }}</td>
+                            <td>{{ p['position'] }}</td>
+                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Hot players -->
+        <div class="card p-3 animate__fadeIn">
+            <h5 class="mb-2">Top "Hot" Players</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Wikipedia</th>
+                            <th>Club</th>
+                            <th>Country</th>
+                            <th>Position</th>
+                            <th>Market Value (€)</th>
+                            <th>Similarity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in hot_players %}
+                        <tr>
+                            <td>
+                                {{ p['name'] }}
+                                {% if p['age'] <= 21 %}
+                                    <span class="prospect-badge">U21</span>
+                                {% endif %}
+                                {% if p.get('contract expiration year') and p['contract expiration year'] <= 2026 %}
+                                    <span class="expiring-badge">Expiring</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ p['age'] }}</td>
+                            <td>
+                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
+                            </td>
+                            <td>{{ p['club name'] }}</td>
+                            <td>{{ p['country of citizenship'] }}</td>
+                            <td>{{ p['position'] }}</td>
+                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Prospects -->
+        <div class="card p-3 animate__fadeIn">
+            <h5 class="mb-2">Top Prospects (U21)</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Wikipedia</th>
+                            <th>Club</th>
+                            <th>Country</th>
+                            <th>Position</th>
+                            <th>Market Value (€)</th>
+                            <th>Similarity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in prospects %}
+                        <tr>
+                            <td>
+                                {{ p['name'] }} <span class="prospect-badge">U21</span>
+                            </td>
+                            <td>{{ p['age'] }}</td>
+                            <td>
+                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
+                            </td>
+                            <td>{{ p['club name'] }}</td>
+                            <td>{{ p['country of citizenship'] }}</td>
+                            <td>{{ p['position'] }}</td>
+                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Expiring contracts -->
+        <div class="card p-3 animate__fadeIn">
+            <h5 class="mb-2">Top Expiring Contracts (≤2026)</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Wikipedia</th>
+                            <th>Club</th>
+                            <th>Country</th>
+                            <th>Position</th>
+                            <th>Contract Expiry</th>
+                            <th>Market Value (€)</th>
+                            <th>Similarity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in expiring %}
+                        <tr>
+                            <td>
+                                {{ p['name'] }}
+                                {% if p['age'] <= 21 %}
+                                    <span class="prospect-badge">U21</span>
+                                {% endif %}
+                                <span class="expiring-badge">Expiring</span>
+                            </td>
+                            <td>{{ p['age'] }}</td>
+                            <td>
+                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
+                            </td>
+                            <td>{{ p['club name'] }}</td>
+                            <td>{{ p['country of citizenship'] }}</td>
+                            <td>{{ p['position'] }}</td>
+                            <td>{{ p['contract expiration year'] }}</td>
+                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-
-    <h4 class="mt-4">Top Nationality: {{ top_nationality }}</h4>
-    <div class="table-responsive" style="overflow-x:auto;">
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Club</th>
-                    <th>Position</th>
-                    <th>Age</th>
-                    <th>Contract Expiration</th>
-                    <th>Similarity</th>
-                    <th>Wikipedia</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for p in nationality_recommendations %}
-                <tr>
-                    <td>{{ p['name'] }}</td>
-                    <td>{{ p['club name'] }}</td>
-                    <td>{{ p['position'] }}</td>
-                    <td>
-                        {{ p['age'] }}
-                        {% if p['age']|int <= 21 %}
-                            <span class="badge bg-info ms-1">U21</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {{ p['contract expiration year'] }}
-                        {% if p['contract expiration year']|int <= 2026 %}
-                            <span class="badge bg-warning ms-1">Expiring</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                    <td><a href="{{ p['wikipedia_url'] }}" target="_blank">Wikipedia</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Prospects Table -->
-    <h4 class="mt-4">Top Prospects (U21)</h4>
-    <div class="table-responsive" style="overflow-x:auto;">
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Club</th>
-                    <th>Position</th>
-                    <th>Age</th>
-                    <th>Contract Expiration</th>
-                    <th>Similarity</th>
-                    <th>Wikipedia</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for p in prospects %}
-                <tr>
-                    <td>{{ p['name'] }}</td>
-                    <td>{{ p['club name'] }}</td>
-                    <td>{{ p['position'] }}</td>
-                    <td>
-                        {{ p['age'] }} <span class="badge bg-info ms-1">U21</span>
-                    </td>
-                    <td>
-                        {{ p['contract expiration year'] }}
-                        {% if p['contract expiration year']|int <= 2026 %}
-                            <span class="badge bg-warning ms-1">Expiring</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                    <td><a href="{{ p['wikipedia_url'] }}" target="_blank">Wikipedia</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Expiring Contracts Table -->
-    <h4 class="mt-4">Expiring Contracts (Up to 2026)</h4>
-    <div class="table-responsive" style="overflow-x:auto;">
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Club</th>
-                    <th>Position</th>
-                    <th>Age</th>
-                    <th>Contract Expiration</th>
-                    <th>Similarity</th>
-                    <th>Wikipedia</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for p in expiring %}
-                <tr>
-                    <td>{{ p['name'] }}</td>
-                    <td>{{ p['club name'] }}</td>
-                    <td>{{ p['position'] }}</td>
-                    <td>
-                        {{ p['age'] }}
-                        {% if p['age']|int <= 21 %}
-                            <span class="badge bg-info ms-1">U21</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {{ p['contract expiration year'] }}
-                        {% if p['contract expiration year']|int <= 2026 %}
-                            <span class="badge bg-warning ms-1">Expiring</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                    <td><a href="{{ p['wikipedia_url'] }}" target="_blank">Wikipedia</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // nationalityCounts
-    const nationalityData = {{ nationality_counts|tojson }};
-    const natLabels = Object.keys(nationalityData);
-    const natValues = Object.values(nationalityData);
-
-    new Chart(document.getElementById('nationalityChart'), {
-        type: 'pie',
-        data: { labels: natLabels, datasets: [{ data: natValues, backgroundColor: ['#62b6cb', '#bdb2ff', '#ffd6a5', '#b5ead7', '#ffb4a2', '#ffafcc'] }] },
-        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-    });
-</script>
+    <script>
+        // Nationality pie chart
+        const nationalityData = {{ nationality_counts|tojson }};
+        window.onload = function () {
+            if (document.getElementById('nationalityChart')) {
+                const ctxNat = document.getElementById('nationalityChart').getContext('2d');
+                new Chart(ctxNat, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(nationalityData),
+                        datasets: [{data: Object.values(nationalityData), backgroundColor: ['#3182ce','#63b3ed','#bee3f8','#7f9cf5','#f6ad55','#feb2b2','#81e6d9','#9ae6b4','#faf089','#fc8181','#b794f4','#f687b3','#68d391','#ecc94b']}]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'right' }}}
+                });
+            }
+        }
+    </script>
 </body>
 </html>

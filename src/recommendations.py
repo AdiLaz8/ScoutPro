@@ -1,6 +1,7 @@
 import pandas as pd
 import main
 import random
+import urllib.parse
 
 def wikipedia_url(name):
     from urllib.parse import quote
@@ -18,49 +19,47 @@ def get_recommendations_tfidf(team_name: str, max_budget: int = None):
     team_positions = main.team_dict[team_name]
     all_positions = list(team_positions.keys())
     if not all_positions:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), None, pd.DataFrame(), pd.DataFrame(), "Unknown"
+        return (pd.DataFrame(),) * 8
 
+    # choose random position and random nationality from all df
+    df = main.final_df.copy()
+    df = add_wikipedia_links(df)
+    df = df[df['club name'] != team_name]
+
+    nationality_choices = df['country of citizenship'].dropna().unique().tolist()
     selected_position = random.choice(all_positions)
+    top_nationality = random.choice(nationality_choices) if nationality_choices else "Unknown"
+
     team_players = [p for players in team_positions.values() for p in players]
     team_df = pd.DataFrame(team_players)
 
-    df = main.final_df.copy()
-    df = add_wikipedia_links(df)
-
-    # המלצה 1 – לעמדה רנדומלית
+    # by position - העיקרי
     candidates = df[df['position'] == selected_position].copy()
     if max_budget is not None:
         candidates['market value in eur'] = pd.to_numeric(candidates['market value in eur'], errors='coerce')
         candidates = candidates[candidates['market value in eur'] <= max_budget]
-    candidates = candidates[candidates['club name'] != team_name]
     if hasattr(main, "similarity_df"):
         sim_vec = main.similarity_df.loc[team_name]
         candidates['similarity_score'] = sim_vec[candidates.index].values
     else:
         candidates['similarity_score'] = 0
     candidates_for_position = candidates.sort_values(by='similarity_score', ascending=False).head(20)
+    nationality_counts = candidates_for_position['country of citizenship'].value_counts().to_dict()
 
-    # המלצה 2 – לפי לאום מוביל
-    nationality_series = team_df['country of citizenship'].dropna()
-    if not nationality_series.empty:
-        top_nationality = nationality_series.value_counts().idxmax()
-        nat_candidates = df[df['country of citizenship'] == top_nationality].copy()
-        nat_candidates = nat_candidates[nat_candidates['club name'] != team_name]
-        if max_budget is not None:
-            nat_candidates['market value in eur'] = pd.to_numeric(nat_candidates['market value in eur'], errors='coerce')
-            nat_candidates = nat_candidates[nat_candidates['market value in eur'] <= max_budget]
-        if hasattr(main, "similarity_df"):
-            sim_vec = main.similarity_df.loc[team_name]
-            nat_candidates['similarity_score'] = sim_vec[nat_candidates.index].values
-        else:
-            nat_candidates['similarity_score'] = 0
-        candidates_for_nationality = nat_candidates.sort_values(by='similarity_score', ascending=False).head(20)
+    # by random nationality
+    nat_candidates = df[df['country of citizenship'] == top_nationality].copy()
+    if max_budget is not None:
+        nat_candidates['market value in eur'] = pd.to_numeric(nat_candidates['market value in eur'], errors='coerce')
+        nat_candidates = nat_candidates[nat_candidates['market value in eur'] <= max_budget]
+    if hasattr(main, "similarity_df"):
+        sim_vec = main.similarity_df.loc[team_name]
+        nat_candidates['similarity_score'] = sim_vec[nat_candidates.index].values
     else:
-        candidates_for_nationality = pd.DataFrame()
-        top_nationality = "Unknown"
+        nat_candidates['similarity_score'] = 0
+    candidates_for_nationality = nat_candidates.sort_values(by='similarity_score', ascending=False).head(20)
 
-    # המלצה 3 – שחקנים חמים
-    hot_players = df[df['club name'] != team_name].copy()
+    # hot players
+    hot_players = df.copy()
     if max_budget is not None:
         hot_players['market value in eur'] = pd.to_numeric(hot_players['market value in eur'], errors='coerce')
         hot_players = hot_players[hot_players['market value in eur'] <= max_budget]
@@ -71,8 +70,8 @@ def get_recommendations_tfidf(team_name: str, max_budget: int = None):
         hot_players['similarity_score'] = 0
     hot_players = hot_players.sort_values(by='similarity_score', ascending=False).head(20)
 
-    # prospects – עד גיל 21
-    prospects = df[(df['age'] <= 21) & (df['club name'] != team_name)].copy()
+    # prospects (u21)
+    prospects = df[df['age'] <= 21].copy()
     prospects['prospect'] = True
     if hasattr(main, "similarity_df"):
         sim_vec = main.similarity_df.loc[team_name]
@@ -81,8 +80,8 @@ def get_recommendations_tfidf(team_name: str, max_budget: int = None):
         prospects['similarity_score'] = 0
     prospects = prospects.sort_values(by='similarity_score', ascending=False).head(20)
 
-    # expiring – מסיימי חוזה עד 2026
-    expiring = df[(pd.to_numeric(df['contract expiration year'], errors='coerce') <= 2026) & (df['club name'] != team_name)].copy()
+    # expiring contracts (<=2026)
+    expiring = df[(pd.to_numeric(df['contract expiration year'], errors='coerce') <= 2026)].copy()
     expiring['expiring'] = True
     if hasattr(main, "similarity_df"):
         sim_vec = main.similarity_df.loc[team_name]
@@ -98,5 +97,6 @@ def get_recommendations_tfidf(team_name: str, max_budget: int = None):
         selected_position,
         prospects,
         expiring,
-        top_nationality
+        top_nationality,
+        nationality_counts
     )

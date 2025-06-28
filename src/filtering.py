@@ -1,6 +1,12 @@
 import pandas as pd
 import main
 from typing import Optional
+import urllib.parse
+
+def get_wikipedia_url(name):
+    name_parts = name.strip().split()
+    url_name = "_".join([part.capitalize() for part in name_parts])
+    return f"https://en.wikipedia.org/wiki/{urllib.parse.quote(url_name)}"
 
 def filter_players_by_criteria(
         team_name: str,
@@ -29,17 +35,14 @@ def filter_players_by_criteria(
 
     filtered_df = main.final_df.copy()
     filtered_df = filtered_df[filtered_df['position'] == position]
-
-    # **Exclude players from selected team**
     filtered_df = filtered_df[filtered_df['club name'] != team_name]
+    filtered_df['wikipedia_url'] = filtered_df['name'].apply(get_wikipedia_url)
 
-    # Age
     if min_age is not None:
         filtered_df = filtered_df[filtered_df['age'] >= min_age]
     if max_age is not None:
         filtered_df = filtered_df[filtered_df['age'] <= max_age]
 
-    # Market value
     if any([max_budget is not None, min_market_val is not None, max_market_val is not None]):
         if 'market value in eur' in filtered_df.columns:
             filtered_df['market value in eur'] = pd.to_numeric(filtered_df['market value in eur'], errors='coerce')
@@ -53,13 +56,11 @@ def filter_players_by_criteria(
     if max_market_val is not None:
         filtered_df = filtered_df[filtered_df['market value in eur'] <= max_market_val]
 
-    # Height
     if min_height is not None:
         filtered_df = filtered_df[filtered_df['height in cm'] >= min_height]
     if max_height is not None:
         filtered_df = filtered_df[filtered_df['height in cm'] <= max_height]
 
-    # Preferred foot
     if preferred_foot is not None:
         preferred_foot = preferred_foot.strip().lower()
         valid_feet = ["right", "left"]
@@ -68,11 +69,9 @@ def filter_players_by_criteria(
         filtered_df['preferred foot'] = filtered_df['preferred foot'].astype(str).str.strip().str.lower()
         filtered_df = filtered_df[filtered_df['preferred foot'] == preferred_foot]
 
-    # Nationality
     if nationality is not None:
         filtered_df = filtered_df[filtered_df['country of citizenship'] == nationality]
 
-    # Contract expiration year
     if 'contract expiration year' in filtered_df.columns:
         filtered_df['contract expiration year'] = pd.to_numeric(
             filtered_df['contract expiration year'], errors='coerce'
@@ -82,17 +81,14 @@ def filter_players_by_criteria(
         if max_contract_exp is not None:
             filtered_df = filtered_df[filtered_df['contract expiration year'] <= max_contract_exp]
 
-    # Current club
     if curr_club is not None:
         filtered_df = filtered_df[filtered_df['club name'] == curr_club]
 
-    # Skills
     if skill_moves is not None:
         filtered_df = filtered_df[filtered_df['skill moves'] >= skill_moves]
     if weak_foot is not None:
         filtered_df = filtered_df[filtered_df['weak foot'] >= weak_foot]
 
-    # Similarity score (TFIDF)
     if hasattr(main, "similarity_df"):
         sim_vec = main.similarity_df.loc[team_name]
         filtered_df['similarity_score'] = sim_vec[filtered_df.index].values
