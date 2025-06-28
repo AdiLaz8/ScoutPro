@@ -64,64 +64,48 @@ def select_criteria(team_name):
 @app.route("/results/<team_name>")
 def results(team_name):
 
-    # עוזר קטן לקריאת הפרמטרים
-    def parse_param(name, cast, allow_empty=True):
+    def parse_param(name, cast):
         v = request.args.get(name)
-        if v in (None, ""):
-            return None if allow_empty else cast(0)
         try:
-            return cast(v)
+            return None if v in (None, "") else cast(v)
         except ValueError:
             return None
 
-    # עמודה חובה
     position = request.args.get("position")
     if not position:
         return "Position must be selected!", 400
 
-    # ---------------- קריטריונים ----------------
     criteria = {
-        "team_name"      : team_name,
-        "position"       : position,
-        "min_age"        : parse_param("min_age", int),
-        "max_age"        : parse_param("max_age", int),
-        "max_budget"     : parse_param("max_budget", int),
-        "min_height"     : parse_param("min_height", int),
-        "max_height"     : parse_param("max_height", int),
+        "team_name"  : team_name,
+        "position"   : position,
+        "min_age"    : parse_param("min_age", int),
+        "max_age"    : parse_param("max_age", int),
+        "max_budget" : parse_param("max_budget", int),
+        "min_height" : parse_param("min_height", int),
+        "max_height" : parse_param("max_height", int),
         "preferred_foot" : request.args.get("preferred_foot") or None,
         "nationality"    : request.args.get("nationality")    or None,
         "min_market_val" : parse_param("min_market_val", int),
         "max_market_val" : parse_param("max_market_val", int),
         "skill_moves"    : parse_param("skill_moves", int),
-        "weak_foot"      : parse_param("weak_foot" ,  int),
+        "weak_foot"      : parse_param("weak_foot",  int),
+        "min_contract_exp" : parse_param("min_contract_exp", int),
+        "max_contract_exp" : parse_param("max_contract_exp", int),
+        "curr_club"        : request.args.get("curr_club") or None,
         "min_similarity" : parse_param("min_similarity", float),
-        "min_content_score" : parse_param("min_content_score", float),
-        "min_final_score"   : parse_param("min_final_score"  , float)
     }
 
-    # # alpha – משקל ציון-תוכן לעומת similarity
-    # alpha = parse_param("alpha", float) or 0.5
-    # criteria["alpha"] = alpha
-
-    # ---------------- הרצת הפילטר ----------------
     try:
         df = filtering.filter_players_by_criteria(**criteria)
     except Exception as e:
         return f"Error filtering players: {e}", 500
 
-    if df.empty:
-        return render_template("results.html",
-                               players=[],
-                               team_name=team_name,
-                               position=position)
-
-    # הופכים לרשימת־מילונים (Jinja תדע להשתמש בזה)
-    players = df.to_dict(orient="records")
-
+    players = df.to_dict(orient="records")      # תמיד רשימה, גם אם ריקה
     return render_template("results.html",
                            players=players,
                            team_name=team_name,
                            position=position)
+
 
 
 # ---------------------------------------

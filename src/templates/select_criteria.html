@@ -131,16 +131,6 @@
         </div>
 
         <hr>
-
-        <!-- אלפא -->
-        <h3 class="text-secondary">Scoring Weight</h3>
-
-        <div class="mb-3">
-            <label for="alpha" class="form-label">Alpha (Weight for Content Score):</label>
-            <input type="range" class="form-range" name="alpha" id="alpha" min="0" max="1" step="0.1" value="0.3" oninput="document.getElementById('alphaValue').innerText = this.value">
-            <div><small>Selected alpha: <span id="alphaValue">0.3</span></small></div>
-        </div>
-
         <div class="mt-4">
             <button type="submit" class="btn btn-success">Search Players</button>
             <button type="reset" class="btn btn-outline-danger ms-2" onclick="resetSliderLabels()">Reset Form</button>
@@ -154,7 +144,6 @@
 <script>
     function resetSliderLabels() {
         setTimeout(() => {
-            document.getElementById('alphaValue').innerText = document.getElementById('alpha').value;
             ageSlider.noUiSlider.set([25, 40]);
             heightSlider.noUiSlider.set([170, 190]);
             skillMovesSlider.noUiSlider.set(3);
