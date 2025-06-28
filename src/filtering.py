@@ -32,7 +32,7 @@ def filter_players_by_criteria(
     if not hasattr(main, 'scored_df'):
         raise ValueError("Scored DataFrame (scored_df) is not available in main.")
 
-    filtered_df = main.scored_df.copy()
+    filtered_df = main.final_df.copy()
     filtered_df = filtered_df[filtered_df['position'] == position]
 
     # גיל
@@ -97,11 +97,17 @@ def filter_players_by_criteria(
     if weak_foot is not None:
         filtered_df = filtered_df[filtered_df['weak foot'] >= weak_foot]
 
-    # ציונים
-    if min_content_score is not None:
-        filtered_df = filtered_df[filtered_df['content_score'] >= min_content_score]
-    if min_final_score is not None:
-        filtered_df = filtered_df[filtered_df['final_score'] >= min_final_score]
+  # ---------- הזרקת ציון similarity ----------
+    if add_similarity:
+        sim_vec = main.similarity_df.loc[team_name]                  # pandas.Series
+        filtered_df['similarity_score'] = sim_vec[filtered_df.index].values
+        if min_similarity is not None:
+            filtered_df = filtered_df[filtered_df['similarity_score'] >= min_similarity]
+
+    # מיון סופי – קודם similarity (גבוה->נמוך)
+    sort_cols = ['similarity_score'] if add_similarity else None
+    if sort_cols:
+        filtered_df = filtered_df.sort_values(by=sort_cols, ascending=False)
 
 
     return filtered_df

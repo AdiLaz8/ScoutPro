@@ -20,6 +20,7 @@ merged_df = processing.merge_players_and_attributes(players_df, attributes_df)
 player_stats_df = processing.summarize_player_statistics(get_relative_path('appearances.csv'))
 final_df = processing.merge_with_appearances(merged_df, player_stats_df)
 merged_transfers_df = processing.process_and_merge_transfers(get_relative_path('transfers.csv'), final_df)
+team_dict = processing.create_teams_positions_dict(final_df)
 
 print("final_df columns:", list(final_df.columns))
 print("merged_transfers_df columns:", list(merged_transfers_df.columns))
@@ -102,6 +103,11 @@ position = 'LW'
 ### For computing with alpha adjustment: ###
 alpha = 0.3
 hybrid_similarity_df = tfidf_processing.adjust_alpha_to_similarity(similarity_df, transfers_similarity_df, alpha)
+# === תוספת חדשה: לחשוף אובייקטים גלובליים ===
+globals().update({
+    "final_df": final_df,                       # טבלת כל השחקנים
+    "similarity_df": hybrid_similarity_df       # ציוני similarity היברידיים (אפשר לשנות את השם)
+})
 # Choose team_name and position
 print(f"\nGetting 5 most similar {position} players for team {team_name}, hybrid score:")
 top = tfidf_processing.get_top_k_similar_players(team_name, hybrid_similarity_df, final_df_for_tokenizing, position)
