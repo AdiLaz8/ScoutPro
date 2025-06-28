@@ -1,11 +1,39 @@
+# filtering.py
 import pandas as pd
-import main
-from datetime import datetime
+from functools import lru_cache
 from typing import Optional
 
+import main                    # final_df טעון כאן
+import tfidf_processing        # כל פונקציות TF-IDF שלך
+import score                   # compute_final_content_score  וכו'
+
+# -----------------------------------------------------------
+# ①  חישוב TF-IDF ↔ Similarity פעם אחת במטמון
+# -----------------------------------------------------------
+@lru_cache(maxsize=1)
+def _prepare_similarity():
+    """
+    • מכין DataFrame מכווץ (prepare_values_for_tokenizing)
+    • מחשב TF-IDF  וקוסיין-סימילריטי
+    • מחזיר   token_df , similarity_df
+    (מטמון – רץ פעם אחת בכל הרצת השרת)
+    """
+    token_df = tfidf_processing.prepare_values_for_tokenizing(main.final_df)
+    teams_info   = tfidf_processing.tokenize_per_team(token_df)      # לפי current club
+    players_info = tfidf_processing.tokenize_per_player(token_df)
+    similarity_df = tfidf_processing.compute_tfidf_and_similarity(
+        teams_info, players_info
+    )
+    return token_df, similarity_df
+
+
+# -----------------------------------------------------------
+# ②  פונקציה מרכזית – פילטר + חישוב ציונים
+# -----------------------------------------------------------
 def filter_players_by_criteria(
         team_name: str,
         position: str,
+        # -------- פילטרים סטנדרטיים --------
         min_age: Optional[int] = None,
         max_age: Optional[int] = None,
         max_budget: Optional[int] = None,
@@ -13,101 +41,88 @@ def filter_players_by_criteria(
         max_height: Optional[int] = None,
         preferred_foot: Optional[str] = None,
         nationality: Optional[str] = None,
-        min_contract_exp: Optional[int] = None,
-        max_contract_exp: Optional[int] = None,
         min_market_val: Optional[int] = None,
         max_market_val: Optional[int] = None,
         skill_moves: Optional[int] = None,
-        weak_foot: Optional[int] = None,
-        curr_club: Optional[str] = None,
+        weak_foot:  Optional[int] = None,
+        # -------- פילטרים לפי ציונים --------
+        min_similarity: Optional[float] = None,
         min_content_score: Optional[float] = None,
-        min_final_score: Optional[float] = None
+        min_final_score: Optional[float] = None,
+        alpha: float = 0.5                     # משקל content לעומת similarity
 ) -> pd.DataFrame:
-    if team_name not in main.team_dict:
-        raise ValueError(f"Group {team_name} does not exist.")
+    """
+    מחזירה DataFrame עם:
+        • similarity_score
+        • content_score
+        • final_score  =  α·content  +  (1-α)·similarity
+    ממויין מהגבוה לנמוך ע"פ final_score
+    """
 
-    if not isinstance(position, str):
-        raise ValueError(f"Position {position} must be a string.")
+    # -------- בסיס הנתונים --------
+    df = main.final_df.copy()
+    df = df[df['position'] == position]
 
-    if not hasattr(main, 'scored_df'):
-        raise ValueError("Scored DataFrame (scored_df) is not available in main.")
-
-    filtered_df = main.final_df.copy()
-    filtered_df = filtered_df[filtered_df['position'] == position]
-
-    # גיל
+    # -------- פילטרים "קלאסיים" --------
     if min_age is not None:
-        filtered_df = filtered_df[filtered_df['age'] >= min_age]
+        df = df[df['age'] >= min_age]
     if max_age is not None:
-        filtered_df = filtered_df[filtered_df['age'] <= max_age]
+        df = df[df['age'] <= max_age]
 
-    # ערך שוק
-    if any([max_budget is not None, min_market_val is not None, max_market_val is not None]):
-        if 'market value in eur' in filtered_df.columns:
-            filtered_df['market value in eur'] = pd.to_numeric(filtered_df['market value in eur'], errors='coerce')
-        else:
-            raise ValueError("Missing 'market value in eur' column in the data!")
+    if min_height is not None:
+        df = df[df['height in cm'] >= min_height]
+    if max_height is not None:
+        df = df[df['height in cm'] <= max_height]
+
+    if preferred_foot is not None:
+        df = df[df['preferred foot'].str.lower() == preferred_foot.lower()]
+
+    if nationality is not None:
+        df = df[df['country of citizenship'] == nationality]
 
     if max_budget is not None:
-        filtered_df = filtered_df[filtered_df['market value in eur'] <= max_budget]
+        df = df[df['market value in eur'] <= max_budget]
     if min_market_val is not None:
-        filtered_df = filtered_df[filtered_df['market value in eur'] >= min_market_val]
+        df = df[df['market value in eur'] >= min_market_val]
     if max_market_val is not None:
-        filtered_df = filtered_df[filtered_df['market value in eur'] <= max_market_val]
+        df = df[df['market value in eur'] <= max_market_val]
 
-    # גובה
-    if min_height is not None:
-        filtered_df = filtered_df[filtered_df['height in cm'] >= min_height]
-    if max_height is not None:
-        filtered_df = filtered_df[filtered_df['height in cm'] <= max_height]
-
-    # רגל מועדפת
-    if preferred_foot is not None:
-        preferred_foot = preferred_foot.strip().lower()
-        valid_feet = ["right", "left"]
-        if preferred_foot not in valid_feet:
-            raise ValueError("Preferred foot value must be 'right' or 'left'.")
-
-        # Normalize the column too
-        filtered_df['preferred foot'] = filtered_df['preferred foot'].astype(str).str.strip().str.lower()
-        filtered_df = filtered_df[filtered_df['preferred foot'] == preferred_foot]
-
-    # לאום
-    if nationality is not None:
-        filtered_df = filtered_df[filtered_df['country of citizenship'] == nationality]
-
-    # חוזה – טווח
-    # חוזה – טווח לפי contract expiration year
-    if 'contract expiration year' in filtered_df.columns:
-        filtered_df['contract expiration year'] = pd.to_numeric(
-            filtered_df['contract expiration year'], errors='coerce'
-        )
-        if min_contract_exp is not None:
-            filtered_df = filtered_df[filtered_df['contract expiration year'] >= min_contract_exp]
-        if max_contract_exp is not None:
-            filtered_df = filtered_df[filtered_df['contract expiration year'] <= max_contract_exp]
-
-    # מועדון נוכחי
-    if curr_club is not None:
-        filtered_df = filtered_df[filtered_df['club name'] == curr_club]
-
-    # סקיל מובס ורגל חלשה
     if skill_moves is not None:
-        filtered_df = filtered_df[filtered_df['skill moves'] >= skill_moves]
+        df = df[df['skill moves'] >= skill_moves]
     if weak_foot is not None:
-        filtered_df = filtered_df[filtered_df['weak foot'] >= weak_foot]
+        df = df[df['weak foot']  >= weak_foot]
 
-  # ---------- הזרקת ציון similarity ----------
-    if add_similarity:
-        sim_vec = main.similarity_df.loc[team_name]                  # pandas.Series
-        filtered_df['similarity_score'] = sim_vec[filtered_df.index].values
-        if min_similarity is not None:
-            filtered_df = filtered_df[filtered_df['similarity_score'] >= min_similarity]
+    # ---------------------------------------------------
+    # חישוב similarity עבור השחקנים שנשארו אחרי הפילטר
+    # ---------------------------------------------------
+    token_df, similarity_df = _prepare_similarity()
 
-    # מיון סופי – קודם similarity (גבוה->נמוך)
-    sort_cols = ['similarity_score'] if add_similarity else None
-    if sort_cols:
-        filtered_df = filtered_df.sort_values(by=sort_cols, ascending=False)
+    if team_name not in similarity_df.index:
+        raise ValueError(f"Team '{team_name}' not found in similarity matrix")
 
+    # התאמה בין אינדקס df לאינדקס token_df  (זהים כי לא שינינו)
+    team_scores = similarity_df.loc[team_name]
+    df['similarity_score'] = team_scores[df.index].values
 
-    return filtered_df
+    # ---------------------------------------------------
+    # חישוב content + final scores
+    # ---------------------------------------------------
+    # df['content_score'] = df.apply(
+    #     lambda row: score.compute_final_content_score(row, row['position']),
+    #     axis=1
+    # )
+    # df['final_score'] = alpha * df['content_score'] + (1 - alpha) * df['similarity_score']
+
+    # פילטרים אחרונים לפי ציונים
+    if min_similarity is not None:
+        df = df[df['similarity_score'] >= min_similarity]
+    # if min_content_score is not None:
+    #     df = df[df['content_score'] >= min_content_score]
+    # if min_final_score is not None:
+    #     df = df[df['final_score']   >= min_final_score]
+
+    # מיון תוצאה
+    df = df.sort_values('similarity_score', ascending=False)
+
+    # נחזיר רק עמודות רלוונטיות (אבל תשאיר מה שצריך לטבלה)
+    return df.reset_index(drop=False)   # index  ← player_id

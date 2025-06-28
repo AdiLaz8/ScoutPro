@@ -101,7 +101,7 @@ position = 'LW'
 # print(top.to_string(index=False))
 
 ### For computing with alpha adjustment: ###
-alpha = 0.3
+alpha = 0.5
 hybrid_similarity_df = tfidf_processing.adjust_alpha_to_similarity(similarity_df, transfers_similarity_df, alpha)
 # === תוספת חדשה: לחשוף אובייקטים גלובליים ===
 globals().update({
