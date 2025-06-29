@@ -27,8 +27,61 @@
         <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-outline-primary mb-3 ms-2">Player Search (Filters)</a>
         <h1 class="mb-3 text-primary text-center animate__fadeInDown">Smart Recommendations for {{ team_name }}</h1>
         <h4 class="text-center mb-4">Best by Position: <span class="text-info">{{ selected_position }}</span></h4>
-        
-        <!-- Main table: by position -->
+
+        <!-- עמודות מלאות — רק שנה את ה־for של p לפי הטבלה המתאימה -->
+        {% macro player_row(p) %}
+        <tr>
+            <td>{{ p['name'] }}</td>
+            <td>{{ "%.3f"|format(p.get('similarity_score', 0)) }}</td>
+            <td>{{ p['club name'] }}</td>
+            <td>{{ p['country of citizenship'] }}</td>
+            <td>{{ p['position'] }}</td>
+            <td>
+                {{ p['age'] }}
+                {% if p['age']|int <= 21 %}
+                    <span class="prospect-badge">U21</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ p['wikipedia_url'] }}" target="_blank" class="btn btn-sm btn-outline-secondary">Wikipedia</a>
+            </td>
+            <td>
+                {{ p['contract expiration year'] }}
+                {% if p.get('contract expiration year') and p['contract expiration year']|int <= 2026 %}
+                    <span class="expiring-badge">Expiring</span>
+                {% endif %}
+            </td>
+            <td>{{ p['market value in eur'] | human_value }}</td>
+            <td>{{ p.get('height in cm', 'n/a') }}</td>
+            <td>{{ p.get('preferred foot', 'n/a') }}</td>
+            <!-- EXTRA COLUMNS -->
+            <td>{{ p.get('acceleration', 'n/a') }}</td>
+            <td>{{ p.get('sprint speed', 'n/a') }}</td>
+            <td>{{ p.get('finishing', 'n/a') }}</td>
+            <td>{{ p.get('long shots', 'n/a') }}</td>
+            <td>{{ p.get('penalties', 'n/a') }}</td>
+            <td>{{ p.get('crossing', 'n/a') }}</td>
+            <td>{{ p.get('short passing', 'n/a') }}</td>
+            <td>{{ p.get('long passing', 'n/a') }}</td>
+            <td>{{ p.get('dribbling', 'n/a') }}</td>
+            <td>{{ p.get('ball control', 'n/a') }}</td>
+            <td>{{ p.get('interceptions', 'n/a') }}</td>
+            <td>{{ p.get('heading accuracy', 'n/a') }}</td>
+            <td>{{ p.get('standing tackle', 'n/a') }}</td>
+            <td>{{ p.get('sliding tackle', 'n/a') }}</td>
+            <td>{{ p.get('strength', 'n/a') }}</td>
+            <td>{{ p.get('stamina', 'n/a') }}</td>
+            <td>{{ p.get('vision', 'n/a') }}</td>
+            <td>{{ p.get('gk reflexes', 'n/a') }}</td>
+            <td>{{ p.get('gk kicking', 'n/a') }}</td>
+            <td>{{ p.get('weak foot', 'n/a') }}</td>
+            <td>{{ p.get('skill moves', 'n/a') }}</td>
+            <td>{{ p.get('assists', 'n/a') }}</td>
+            <td>{{ p.get('goals', 'n/a') }}</td>
+        </tr>
+        {% endmacro %}
+
+        <!-- Top by Position -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top {{ selected_position }} Recommendations</h5>
             <div class="table-responsive">
@@ -36,219 +89,263 @@
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th>Similarity</th>
+                            <th>Club</th>
+                            <th>Nationality</th>
+                            <th>Position</th>
                             <th>Age</th>
                             <th>Wikipedia</th>
-                            <th>Club</th>
-                            <th>Country</th>
-                            <th>Position</th>
-                            <th>Market Value (€)</th>
-                            <th>Similarity</th>
-                            <th>Details</th>
+                            <th>Contract Expiration</th>
+                            <th>Market Value</th>
+                            <th>Height</th>
+                            <th>Preferred Foot</th>
+                            <!-- extra cols -->
+                            <th>Acceleration</th>
+                            <th>Sprint Speed</th>
+                            <th>Finishing</th>
+                            <th>Long Shots</th>
+                            <th>Penalties</th>
+                            <th>Crossing</th>
+                            <th>Short Passing</th>
+                            <th>Long Passing</th>
+                            <th>Dribbling</th>
+                            <th>Ball Control</th>
+                            <th>Interceptions</th>
+                            <th>Heading Accuracy</th>
+                            <th>Standing Tackle</th>
+                            <th>Sliding Tackle</th>
+                            <th>Strength</th>
+                            <th>Stamina</th>
+                            <th>Vision</th>
+                            <th>GK Reflexes</th>
+                            <th>GK Kicking</th>
+                            <th>Weak Foot</th>
+                            <th>Skill Moves</th>
+                            <th>Assists</th>
+                            <th>Goals</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for p in position_recommendations %}
-                        <tr>
-                            <td>
-                                {{ p['name'] }}
-                                {% if p['age'] <= 21 %}
-                                    <span class="prospect-badge">U21</span>
-                                {% endif %}
-                                {% if p.get('contract expiration year') and p['contract expiration year'] <= 2026 %}
-                                    <span class="expiring-badge">Expiring</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ p['age'] }}</td>
-                            <td>
-                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
-                            </td>
-                            <td>{{ p['club name'] }}</td>
-                            <td>{{ p['country of citizenship'] }}</td>
-                            <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] | human_value }}</td>
-                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                            <td>
-                                <a href="{{ p['wikipedia_url'] }}" target="_blank" class="btn-link">Profile</a>
-                            </td>
-                        </tr>
+                        {{ player_row(p) }}
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Nationality Pie Chart under main table, much smaller -->
+        <!-- Pie Chart -->
         <div class="mb-4 d-flex justify-content-center">
             <canvas id="nationalityChart" width="800" height="800" style="max-width:800px; max-height:800px;"></canvas>
         </div>
 
-
-        <!-- By nationality -->
+        <!-- שאר הטבלאות: כל אחת אותו הדבר בדיוק! -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top {{ top_nationality }} Players</h5>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
+                            <!-- ... אותו thead כמו למעלה ... -->
                             <th>Name</th>
+                            <th>Similarity</th>
+                            <th>Club</th>
+                            <th>Nationality</th>
+                            <th>Position</th>
                             <th>Age</th>
                             <th>Wikipedia</th>
-                            <th>Club</th>
-                            <th>Position</th>
-                            <th>Market Value (€)</th>
-                            <th>Similarity</th>
+                            <th>Contract Expiration</th>
+                            <th>Market Value</th>
+                            <th>Height</th>
+                            <th>Preferred Foot</th>
+                            <!-- extra cols -->
+                            <th>Acceleration</th>
+                            <th>Sprint Speed</th>
+                            <th>Finishing</th>
+                            <th>Long Shots</th>
+                            <th>Penalties</th>
+                            <th>Crossing</th>
+                            <th>Short Passing</th>
+                            <th>Long Passing</th>
+                            <th>Dribbling</th>
+                            <th>Ball Control</th>
+                            <th>Interceptions</th>
+                            <th>Heading Accuracy</th>
+                            <th>Standing Tackle</th>
+                            <th>Sliding Tackle</th>
+                            <th>Strength</th>
+                            <th>Stamina</th>
+                            <th>Vision</th>
+                            <th>GK Reflexes</th>
+                            <th>GK Kicking</th>
+                            <th>Weak Foot</th>
+                            <th>Skill Moves</th>
+                            <th>Assists</th>
+                            <th>Goals</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for p in nationality_recommendations %}
-                        <tr>
-                            <td>
-                                {{ p['name'] }}
-                                {% if p['age'] <= 21 %}
-                                    <span class="prospect-badge">U21</span>
-                                {% endif %}
-                                {% if p.get('contract expiration year') and p['contract expiration year'] <= 2026 %}
-                                    <span class="expiring-badge">Expiring</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ p['age'] }}</td>
-                            <td>
-                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
-                            </td>
-                            <td>{{ p['club name'] }}</td>
-                            <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] | human_value }}</td>
-                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                        </tr>
+                        {{ player_row(p) }}
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- Hot players -->
+        <!-- Hot -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top "Hot" Players</h5>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
+                        <!-- אותו thead -->
                         <tr>
+                            <!-- ... -->
                             <th>Name</th>
+                            <th>Similarity</th>
+                            <th>Club</th>
+                            <th>Nationality</th>
+                            <th>Position</th>
                             <th>Age</th>
                             <th>Wikipedia</th>
-                            <th>Club</th>
-                            <th>Country</th>
-                            <th>Position</th>
-                            <th>Market Value (€)</th>
-                            <th>Similarity</th>
+                            <th>Contract Expiration</th>
+                            <th>Market Value</th>
+                            <th>Height</th>
+                            <th>Preferred Foot</th>
+                            <th>Acceleration</th>
+                            <th>Sprint Speed</th>
+                            <th>Finishing</th>
+                            <th>Long Shots</th>
+                            <th>Penalties</th>
+                            <th>Crossing</th>
+                            <th>Short Passing</th>
+                            <th>Long Passing</th>
+                            <th>Dribbling</th>
+                            <th>Ball Control</th>
+                            <th>Interceptions</th>
+                            <th>Heading Accuracy</th>
+                            <th>Standing Tackle</th>
+                            <th>Sliding Tackle</th>
+                            <th>Strength</th>
+                            <th>Stamina</th>
+                            <th>Vision</th>
+                            <th>GK Reflexes</th>
+                            <th>GK Kicking</th>
+                            <th>Weak Foot</th>
+                            <th>Skill Moves</th>
+                            <th>Assists</th>
+                            <th>Goals</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for p in hot_players %}
-                        <tr>
-                            <td>
-                                {{ p['name'] }}
-                                {% if p['age'] <= 21 %}
-                                    <span class="prospect-badge">U21</span>
-                                {% endif %}
-                                {% if p.get('contract expiration year') and p['contract expiration year'] <= 2026 %}
-                                    <span class="expiring-badge">Expiring</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ p['age'] }}</td>
-                            <td>
-                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
-                            </td>
-                            <td>{{ p['club name'] }}</td>
-                            <td>{{ p['country of citizenship'] }}</td>
-                            <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] | human_value }}</td>
-                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                        </tr>
+                        {{ player_row(p) }}
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-
         <!-- Prospects -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top Prospects (U21)</h5>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
+                        <!-- אותו thead -->
                         <tr>
+                            <!-- ... -->
                             <th>Name</th>
+                            <th>Similarity</th>
+                            <th>Club</th>
+                            <th>Nationality</th>
+                            <th>Position</th>
                             <th>Age</th>
                             <th>Wikipedia</th>
-                            <th>Club</th>
-                            <th>Country</th>
-                            <th>Position</th>
-                            <th>Market Value (€)</th>
-                            <th>Similarity</th>
+                            <th>Contract Expiration</th>
+                            <th>Market Value</th>
+                            <th>Height</th>
+                            <th>Preferred Foot</th>
+                            <th>Acceleration</th>
+                            <th>Sprint Speed</th>
+                            <th>Finishing</th>
+                            <th>Long Shots</th>
+                            <th>Penalties</th>
+                            <th>Crossing</th>
+                            <th>Short Passing</th>
+                            <th>Long Passing</th>
+                            <th>Dribbling</th>
+                            <th>Ball Control</th>
+                            <th>Interceptions</th>
+                            <th>Heading Accuracy</th>
+                            <th>Standing Tackle</th>
+                            <th>Sliding Tackle</th>
+                            <th>Strength</th>
+                            <th>Stamina</th>
+                            <th>Vision</th>
+                            <th>GK Reflexes</th>
+                            <th>GK Kicking</th>
+                            <th>Weak Foot</th>
+                            <th>Skill Moves</th>
+                            <th>Assists</th>
+                            <th>Goals</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for p in prospects %}
-                        <tr>
-                            <td>
-                                {{ p['name'] }} <span class="prospect-badge">U21</span>
-                            </td>
-                            <td>{{ p['age'] }}</td>
-                            <td>
-                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
-                            </td>
-                            <td>{{ p['club name'] }}</td>
-                            <td>{{ p['country of citizenship'] }}</td>
-                            <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] | human_value }}</td>
-                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                        </tr>
+                        {{ player_row(p) }}
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-
         <!-- Expiring contracts -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top Expiring Contracts (≤2026)</h5>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
+                        <!-- אותו thead -->
                         <tr>
+                            <!-- ... -->
                             <th>Name</th>
+                            <th>Similarity</th>
+                            <th>Club</th>
+                            <th>Nationality</th>
+                            <th>Position</th>
                             <th>Age</th>
                             <th>Wikipedia</th>
-                            <th>Club</th>
-                            <th>Country</th>
-                            <th>Position</th>
-                            <th>Contract Expiry</th>
-                            <th>Market Value (€)</th>
-                            <th>Similarity</th>
+                            <th>Contract Expiration</th>
+                            <th>Market Value</th>
+                            <th>Height</th>
+                            <th>Preferred Foot</th>
+                            <th>Acceleration</th>
+                            <th>Sprint Speed</th>
+                            <th>Finishing</th>
+                            <th>Long Shots</th>
+                            <th>Penalties</th>
+                            <th>Crossing</th>
+                            <th>Short Passing</th>
+                            <th>Long Passing</th>
+                            <th>Dribbling</th>
+                            <th>Ball Control</th>
+                            <th>Interceptions</th>
+                            <th>Heading Accuracy</th>
+                            <th>Standing Tackle</th>
+                            <th>Sliding Tackle</th>
+                            <th>Strength</th>
+                            <th>Stamina</th>
+                            <th>Vision</th>
+                            <th>GK Reflexes</th>
+                            <th>GK Kicking</th>
+                            <th>Weak Foot</th>
+                            <th>Skill Moves</th>
+                            <th>Assists</th>
+                            <th>Goals</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for p in expiring %}
-                        <tr>
-                            <td>
-                                {{ p['name'] }}
-                                {% if p['age'] <= 21 %}
-                                    <span class="prospect-badge">U21</span>
-                                {% endif %}
-                                <span class="expiring-badge">Expiring</span>
-                            </td>
-                            <td>{{ p['age'] }}</td>
-                            <td>
-                                <a href="{{ p['wikipedia_url'] }}" target="_blank">Wiki</a>
-                            </td>
-                            <td>{{ p['club name'] }}</td>
-                            <td>{{ p['country of citizenship'] }}</td>
-                            <td>{{ p['position'] }}</td>
-                            <td>{{ p['contract expiration year'] }}</td>
-                            <td>{{ p['market value in eur'] | human_value }}</td>
-                            <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                        </tr>
+                        {{ player_row(p) }}
                     {% endfor %}
                     </tbody>
                 </table>

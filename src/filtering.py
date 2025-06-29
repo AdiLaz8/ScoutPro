@@ -37,6 +37,8 @@ def filter_players_by_criteria(
     filtered_df = filtered_df[filtered_df['position'] == position]
     filtered_df = filtered_df[filtered_df['club name'] != team_name]
     filtered_df['wikipedia_url'] = filtered_df['name'].apply(get_wikipedia_url)
+    filtered_df['name'] = filtered_df['name'].apply(lambda n: " ".join([w.capitalize() for w in str(n).split()]))  # ← אות גדולה
+
 
     if min_age is not None:
         filtered_df = filtered_df[filtered_df['age'] >= min_age]

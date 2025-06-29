@@ -38,10 +38,30 @@
                     <th>Market Value</th>
                     <th>Height</th>
                     <th>Preferred Foot</th>
-                    <th>Skill Moves</th>
+                    <!-- EXTRA COLUMNS as requested -->
+                    <th>Acceleration</th>
+                    <th>Sprint Speed</th>
+                    <th>Finishing</th>
+                    <th>Long Shots</th>
+                    <th>Penalties</th>
+                    <th>Crossing</th>
+                    <th>Short Passing</th>
+                    <th>Long Passing</th>
+                    <th>Dribbling</th>
+                    <th>Ball Control</th>
+                    <th>Interceptions</th>
+                    <th>Heading Accuracy</th>
+                    <th>Standing Tackle</th>
+                    <th>Sliding Tackle</th>
+                    <th>Strength</th>
+                    <th>Stamina</th>
+                    <th>Vision</th>
+                    <th>GK Reflexes</th>
+                    <th>GK Kicking</th>
                     <th>Weak Foot</th>
-                    <th>Goals</th>
+                    <th>Skill Moves</th>
                     <th>Assists</th>
+                    <th>Goals</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,7 +78,9 @@
                             <span class="badge bg-info ms-1" data-bs-toggle="tooltip" title="Under 21">U21</span>
                         {% endif %}
                     </td>
-                    <td><a href="{{ p['wikipedia_url'] }}" target="_blank" class="btn btn-sm btn-outline-secondary">Wikipedia</a></td>
+                    <td>
+                        <a href="{{ p['wikipedia_url'] }}" target="_blank" class="btn btn-sm btn-outline-secondary">Wikipedia</a>
+                    </td>
                     <td>
                         {{ p['contract expiration year'] }}
                         {% if p['contract expiration year']|int <= 2026 %}
@@ -68,19 +90,39 @@
                     <td>{{ p['market value in eur'] | human_value }}</td>
                     <td>{{ p['height in cm'] }}</td>
                     <td>{{ p['preferred foot'] }}</td>
-                    <td>{{ p['skill moves'] }}</td>
-                    <td>{{ p['weak foot'] }}</td>
-                    <td>{{ p['goals'] }}</td>
-                    <td>{{ p['assists'] }}</td>
+                    <!-- EXTRA COLUMNS, safely get values -->
+                    <td>{{ p.get('acceleration', 'n/a') }}</td>
+                    <td>{{ p.get('sprint speed', 'n/a') }}</td>
+                    <td>{{ p.get('finishing', 'n/a') }}</td>
+                    <td>{{ p.get('long shots', 'n/a') }}</td>
+                    <td>{{ p.get('penalties', 'n/a') }}</td>
+                    <td>{{ p.get('crossing', 'n/a') }}</td>
+                    <td>{{ p.get('short passing', 'n/a') }}</td>
+                    <td>{{ p.get('long passing', 'n/a') }}</td>
+                    <td>{{ p.get('dribbling', 'n/a') }}</td>
+                    <td>{{ p.get('ball control', 'n/a') }}</td>
+                    <td>{{ p.get('interceptions', 'n/a') }}</td>
+                    <td>{{ p.get('heading accuracy', 'n/a') }}</td>
+                    <td>{{ p.get('standing tackle', 'n/a') }}</td>
+                    <td>{{ p.get('sliding tackle', 'n/a') }}</td>
+                    <td>{{ p.get('strength', 'n/a') }}</td>
+                    <td>{{ p.get('stamina', 'n/a') }}</td>
+                    <td>{{ p.get('vision', 'n/a') }}</td>
+                    <td>{{ p.get('gk reflexes', 'n/a') }}</td>
+                    <td>{{ p.get('gk kicking', 'n/a') }}</td>
+                    <td>{{ p.get('weak foot', 'n/a') }}</td>
+                    <td>{{ p.get('skill moves', 'n/a') }}</td>
+                    <td>{{ p.get('assists', 'n/a') }}</td>
+                    <td>{{ p.get('goals', 'n/a') }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
-    <!-- Pie Chart -->
+    <!-- Pie Chart (as before) -->
     <div class="row mt-4 mb-3 animate__animated animate__fadeIn">
         <div class="col-md-6 mx-auto">
-            <canvas id="nationalityChart"></canvas>
+            <canvas id="nationalityChart" style="max-width:320px;max-height:180px;"></canvas>
         </div>
     </div>
 </div>
