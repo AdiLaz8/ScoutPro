@@ -28,13 +28,13 @@
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Similarity</th>
                     <th>Club</th>
                     <th>Nationality</th>
                     <th>Position</th>
                     <th>Age</th>
                     <th>Wikipedia</th>
                     <th>Contract Expiration</th>
-                    <th>Similarity</th>
                     <th>Market Value</th>
                     <th>Height</th>
                     <th>Preferred Foot</th>
@@ -48,6 +48,7 @@
             {% for p in players %}
                 <tr>
                     <td>{{ p['name'] }}</td>
+                    <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
                     <td>{{ p['club name'] }}</td>
                     <td>{{ p['country of citizenship'] }}</td>
                     <td>{{ p['position'] }}</td>
@@ -64,8 +65,7 @@
                             <span class="badge bg-warning ms-1" data-bs-toggle="tooltip" title="Expiring">Expiring</span>
                         {% endif %}
                     </td>
-                    <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
-                    <td>{{ p['market value in eur'] }}</td>
+                    <td>{{ p['market value in eur'] | human_value }}</td>
                     <td>{{ p['height in cm'] }}</td>
                     <td>{{ p['preferred foot'] }}</td>
                     <td>{{ p['skill moves'] }}</td>

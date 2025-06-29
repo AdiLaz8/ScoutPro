@@ -20,6 +20,16 @@ final_df = processing.merge_with_appearances(merged_df, player_stats_df)
 merged_transfers_df = processing.process_and_merge_transfers(get_relative_path('transfers.csv'), final_df)
 team_dict = processing.create_teams_positions_dict(final_df)
 
+# ------------------------------------------
+# הדפסת דוגמה לבדיקה – לוודא שאין נירמול
+# ------------------------------------------
+print("\n🎯 Sample player from final_df:")
+print(final_df[["name", "position", "acceleration", "finishing", "stamina", "strength"]].head(1))
+
+print("\n🔄 Sample player from merged_transfers_df:")
+print(merged_transfers_df[["name", "position", "acceleration", "finishing", "stamina", "strength"]].head(1))
+
+
 # print("final_df columns:", list(final_df.columns))
 # print("merged_transfers_df columns:", list(merged_transfers_df.columns))
 

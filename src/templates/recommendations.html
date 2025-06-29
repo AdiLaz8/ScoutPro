@@ -65,7 +65,7 @@
                             <td>{{ p['club name'] }}</td>
                             <td>{{ p['country of citizenship'] }}</td>
                             <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ p['market value in eur'] | human_value }}</td>
                             <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
                             <td>
                                 <a href="{{ p['wikipedia_url'] }}" target="_blank" class="btn-link">Profile</a>
@@ -117,7 +117,7 @@
                             </td>
                             <td>{{ p['club name'] }}</td>
                             <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ p['market value in eur'] | human_value }}</td>
                             <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
                         </tr>
                     {% endfor %}
@@ -162,7 +162,7 @@
                             <td>{{ p['club name'] }}</td>
                             <td>{{ p['country of citizenship'] }}</td>
                             <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ p['market value in eur'] | human_value }}</td>
                             <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
                         </tr>
                     {% endfor %}
@@ -201,7 +201,7 @@
                             <td>{{ p['club name'] }}</td>
                             <td>{{ p['country of citizenship'] }}</td>
                             <td>{{ p['position'] }}</td>
-                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ p['market value in eur'] | human_value }}</td>
                             <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
                         </tr>
                     {% endfor %}
@@ -246,7 +246,7 @@
                             <td>{{ p['country of citizenship'] }}</td>
                             <td>{{ p['position'] }}</td>
                             <td>{{ p['contract expiration year'] }}</td>
-                            <td>{{ p['market value in eur'] }}</td>
+                            <td>{{ p['market value in eur'] | human_value }}</td>
                             <td>{{ "%.3f"|format(p['similarity_score']) }}</td>
                         </tr>
                     {% endfor %}

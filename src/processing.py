@@ -1,10 +1,6 @@
 import pandas as pd
 from datetime import datetime
 
-
-def normalize_column(series):
-    return (series - series.min()) / (series.max() - series.min())
-
 # loads player attributes from a CSV file, normalizes them, and prepares the DataFrame
 def load_prepare_attributes(filepath: str) -> pd.DataFrame:
     df = pd.read_csv(filepath)
@@ -37,14 +33,14 @@ def load_prepare_attributes(filepath: str) -> pd.DataFrame:
     df["final_position"] = df["position"].map(position_map)
     df = df.dropna(subset=["final_position"])
 
-    norm_cols = []
+    attr_cols = []
     for col in attr:
         if col in df.columns and col not in general_cols:
-            norm_col = col.replace(" ", "_")
-            df[norm_col] = normalize_column(df[col])
-            norm_cols.append(norm_col)
+            attr_col = col.replace(" ", "_")
+            df[attr_col] = df[col]
+            attr_cols.append(attr_col)
 
-    return df[["name", "final_position","age", "preferred foot", "weak foot", "skill moves"] + norm_cols]
+    return df[["name", "final_position","age", "preferred foot", "weak foot", "skill moves"] + attr_cols]
 
 def filter_and_process_players(file_path):
     df = pd.read_csv(file_path)

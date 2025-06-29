@@ -6,6 +6,31 @@ import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key_here"
+# ---------  FORMAT MONEY  ---------
+def human_value(value):
+    """
+    950        -> 950
+    27 500     -> 28K
+    1 200 000  -> 1.2M
+    55 000 000 -> 55M
+    """
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        return value                     # אם לא מספר
+
+    if value >= 1_000_000:
+        num = value / 1_000_000
+        return f"{num:.1f}M".rstrip('0').rstrip('.')  # 1.0M -> 1M
+    elif value >= 1_000:
+        return f"{round(value / 1_000)}K"
+    else:
+        return str(value)
+
+# רישום הפילטר בכל ה-templates
+app.jinja_env.filters["human_value"] = human_value
+# ---------  /FORMAT MONEY  ---------
+
 
 @app.route("/", methods=["GET", "POST"])
 def select_team():

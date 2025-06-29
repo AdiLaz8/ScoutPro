@@ -7,18 +7,75 @@
 </head>
 <body>
 <div class="container py-4">
-    <div class="card mx-auto p-4" style="max-width: 520px;">
+    <div class="card p-4 mx-auto w-100" style="max-width: 960px;">
         <h3 class="mb-4 text-center text-primary">Player Search Filters</h3>
         <form method="post">
-            <div class="mb-3">
-                <label class="form-label fw-bold">Position</label>
-                <select class="form-select" name="position" required>
-                    <option value="" disabled {% if not selected_filters.position %}selected{% endif %}>Select position</option>
-                    {% for pos in positions %}
-                        <option value="{{ pos }}" {% if selected_filters.position == pos %}selected{% endif %}>{{ pos }}</option>
-                    {% endfor %}
-                </select>
+            <!-- === POSITION MAP ================================================== -->
+            <style>
+                .pitch-wrapper { margin-top: .25rem !important;
+                    position: relative;
+                    width: 100%;
+                    max-width: 420px;
+                    aspect-ratio: 3 / 4;
+                    margin: 0 auto 1rem auto;
+                    background: url("{{ url_for('static', filename='img/pitch.png') }}") no-repeat center/contain;
+                }
+            
+                .pos-btn {
+                    position: absolute;
+                    width: 44px; height: 44px;
+                    border-radius: 50%;
+                    background: #2e7d32;
+                    color: #fff; font-weight: 700;
+                    font-size: 0.8rem;
+                    border: 2px solid transparent;
+                    display: flex; align-items: center; justify-content: center;
+                    cursor: pointer; user-select: none;
+                    transition: .15s;
+                }
+                .pos-btn:hover { transform: scale(1.1); }
+                .pos-btn.selected { border-color: #ffc107; }
+            
+                .pos-gk  { bottom: 9%;   left: 50%; transform: translate(-50%, 0); }
+                .pos-lb  { bottom: 20%;  left: 16%; }
+                .pos-cb  { bottom: 20%;  left: 50%; transform: translate(-50%, 0); }
+                .pos-rb  { bottom: 20%;  right: 16%; }
+            
+                .pos-cm { bottom: 52%;  left: 50%; transform: translate(-50%, 0); }
+                .pos-lm  { bottom: 52%;  left: 16%; }
+                .pos-cdm  { bottom: 36%;  left: 50%; transform: translate(-50%, 0); }  /* היה CDM */
+                .pos-rm  { bottom: 52%;  right: 16%; }
+            
+                .pos-cam { bottom: 70%;  left: 50%; transform: translate(-50%, 0); }  /* היה CM */
+            
+                .pos-lw  { top: 10%;     left: 16%; }
+                .pos-st  { top: 10%;     left: 50%; transform: translate(-50%, 0); }
+                .pos-rw  { top: 10%;     right: 16%; }
+            </style>
+            
+
+            <div class="text-center mb-2">
+                <label class="form-label fw-bold mb-0">Position</label>
+            </div>            
+            <input type="hidden" id="position_input" name="position" value="{{ selected_filters.position or '' }}">
+
+            <div class="pitch-wrapper">
+                {% for code in ['GK','LB','CB','RB','CDM','LM','CM','RM','LW','ST','RW','CAM'] %}
+                    <div class="pos-btn pos-{{ code|lower }} {% if selected_filters.position == code %}selected{% endif %}"
+                        data-pos="{{ code }}">{{ code }}</div>
+                {% endfor %}
             </div>
+
+            <script>
+            document.querySelectorAll('.pos-btn').forEach(btn=>{
+                btn.addEventListener('click',()=>{
+                    document.getElementById('position_input').value = btn.dataset.pos;
+                    document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                });
+            });
+            </script>
+            <!-- === POSITION MAP END ============================================== -->
             <div class="row g-2">
                 <div class="col-6">
                     <label class="form-label">Min Age</label>
@@ -76,9 +133,14 @@
                 </div>
             </div>
             <div class="d-grid gap-2 mt-4">
-                <button type="submit" class="btn btn-success btn-lg">Show Players</button>
-                <a href="{{ url_for('select_team') }}" class="btn btn-outline-secondary btn-lg">← Back to Team Selection</a>
+                <button type="submit" class="btn btn-primary btn-lg">Show Players</button>
+                <a href="{{ url_for('recommendations_page', team_name=team_name) }}"
+                   class="btn btn-success btn-lg">Smart Recommendations</a>
+                <a href="{{ url_for('select_team') }}"
+                   class="btn btn-outline-secondary btn-lg">← Back to Team Selection</a>
             </div>
+            
+            
         </form>
     </div>
 </div>
