@@ -3,8 +3,6 @@ import pandas as pd
 import json
 import processing
 import tfidf_processing
-import score
-import kmeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
@@ -13,7 +11,7 @@ import matplotlib.pyplot as plt
 def get_relative_path(filename):
     return os.path.join('..', 'data', filename)
 
-# שלב 1: טעינה ועיבוד נתונים
+# Load and process the data.
 players_df = processing.filter_and_process_players(get_relative_path('players.csv'))
 attributes_df = processing.load_prepare_attributes(get_relative_path('male_players.csv'))
 merged_df = processing.merge_players_and_attributes(players_df, attributes_df)
@@ -22,11 +20,10 @@ final_df = processing.merge_with_appearances(merged_df, player_stats_df)
 merged_transfers_df = processing.process_and_merge_transfers(get_relative_path('transfers.csv'), final_df)
 team_dict = processing.create_teams_positions_dict(final_df)
 
-print("final_df columns:", list(final_df.columns))
-print("merged_transfers_df columns:", list(merged_transfers_df.columns))
+# print("final_df columns:", list(final_df.columns))
+# print("merged_transfers_df columns:", list(merged_transfers_df.columns))
 
 
-### Relevant from here ###
 print("\n✅ Transfer table successfully merged with player attributes.")
 print(f"Number of rows after filtering and merging: {len(merged_transfers_df)}")
 
@@ -103,10 +100,9 @@ position = 'LW'
 ### For computing with alpha adjustment: ###
 alpha = 0.3
 hybrid_similarity_df = tfidf_processing.adjust_alpha_to_similarity(similarity_df, transfers_similarity_df, alpha)
-# === תוספת חדשה: לחשוף אובייקטים גלובליים ===
 globals().update({
-    "final_df": final_df,                       # טבלת כל השחקנים
-    "similarity_df": hybrid_similarity_df       # ציוני similarity היברידיים (אפשר לשנות את השם)
+    "final_df": final_df,                       
+    "similarity_df": hybrid_similarity_df      
 })
 # Choose team_name and position
 print(f"\nGetting 5 most similar {position} players for team {team_name}, hybrid score:")

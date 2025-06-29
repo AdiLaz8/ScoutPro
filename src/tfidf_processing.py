@@ -8,7 +8,6 @@ def prepare_values_for_tokenizing(final: pd.DataFrame) -> pd.DataFrame:
     # Use a copy of the dataframe so we won't manipulate the original.
     final_for_token = final.copy()
 
-    # TODO: Check problems with 'goals', 'assists', 'transfer_fee'!!!
     # Standardize the columns' names and drop columns you don't need
     final_for_token.columns = [col.replace(' ', '_') for col in final_for_token.columns]
     to_remove = {'transfer_season', 'from_club_name', 'contract_expiration_year', 'goals', 'assists', 'transfer_fee'}
@@ -129,7 +128,7 @@ def compute_tfidf_and_similarity(teams_info: dict[str, str], players_info: dict[
     similarity_df = pd.DataFrame(similarity_mat, index=team_names, columns=player_names)
     return similarity_df
 
-def adjust_alpha_to_similarity(curr_team_similarity: pd.DataFrame, transfers_similarity: pd.DataFrame, alpha: int = 0.5) -> pd.DataFrame:
+def adjust_alpha_to_similarity(curr_team_similarity: pd.DataFrame, transfers_similarity: pd.DataFrame, alpha: int = 0.7) -> pd.DataFrame:
     hybrid_similarity_df =  alpha * curr_team_similarity + (1 - alpha) * transfers_similarity
     return hybrid_similarity_df
 

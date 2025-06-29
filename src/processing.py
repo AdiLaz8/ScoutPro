@@ -5,6 +5,7 @@ from datetime import datetime
 def normalize_column(series):
     return (series - series.min()) / (series.max() - series.min())
 
+# loads player attributes from a CSV file, normalizes them, and prepares the DataFrame
 def load_prepare_attributes(filepath: str) -> pd.DataFrame:
     df = pd.read_csv(filepath)
 
@@ -72,7 +73,6 @@ def filter_and_process_players(file_path):
     )
     df_selected = df_selected.drop(columns=["contract_expiration_date"])
 
-    # תיקון ברור: שמור את השם של העמודות הקריטיות
     df_selected.columns = [
         col if col in ['player_id', 'current_club_id'] else col.replace("_", " ") 
         for col in df_selected.columns
@@ -81,9 +81,8 @@ def filter_and_process_players(file_path):
     return df_selected
 
 
-
+# Merges players DataFrame with attributes DataFrame on the 'name' column
 def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.DataFrame) -> pd.DataFrame:
-
     players_df["name"] = players_df["name"].str.strip().str.lower()
     attributes_df["name"] = attributes_df["name"].str.strip().str.lower()
     players_df = players_df.drop_duplicates(subset=["name"])
@@ -91,6 +90,7 @@ def merge_players_and_attributes(players_df: pd.DataFrame, attributes_df: pd.Dat
     merged_df = pd.merge(players_df, attributes_df, on="name", how="inner")
     return merged_df
 
+# Summarizes player statistics by player_id, summing goals and assists for the 2023-2024 season
 def summarize_player_statistics(file_path):
     df = pd.read_csv(file_path)
     if 'player_id' in df.columns and 'goals' in df.columns and 'assists' in df.columns and 'date' in df.columns:
@@ -105,6 +105,7 @@ def summarize_player_statistics(file_path):
         return None
     return summary_df
 
+# merges the player attributes with their appearances and statistics
 def merge_with_appearances(merged_df: pd.DataFrame, appearances_df: pd.DataFrame) -> pd.DataFrame:
     merged_full = pd.merge(merged_df, appearances_df, on="player_id", how="left")
     merged_full["goals"] = merged_full["goals"].fillna(0).astype(int)
@@ -127,7 +128,7 @@ def merge_with_appearances(merged_df: pd.DataFrame, appearances_df: pd.DataFrame
 
     return merged_full
 
-
+# creates a dictionary of teams and their positions with player details
 def create_teams_positions_dict(df):
     if not {'club name', 'position'}.issubset(df.columns):
         print("Missing required columns in the DataFrame.")
@@ -141,29 +142,26 @@ def create_teams_positions_dict(df):
         teams_dict[team][position].extend(group.to_dict('records'))  
     return teams_dict
 
-# TODO: Club names in transfers_df (from/to_club_name) may be different than in final_df (club_name).
-
+# processes transfers data, merges it with final_df, and returns the merged DataFrame
 def process_and_merge_transfers(transfers_path: str, final_df: pd.DataFrame) -> pd.DataFrame:
     df_transfers = pd.read_csv(transfers_path)
     
-    # שמירה רק על העמודות הרלוונטיות
+    # keep only the relevant columns
     required_cols = ['transfer_season', 'from_club_name', 'to_club_name', 'to_club_id', 'transfer_fee', 'player_name']
     df_transfers = df_transfers.dropna(subset=required_cols)
     df_transfers = df_transfers[required_cols]
 
-    # סינון לפי עונות רלוונטיות
+    # we wan the last 5 seasons
     valid_seasons = {'19/20', '20/21', '21/22', '22/23', '23/24', '24/25'}
     df_transfers = df_transfers[df_transfers['transfer_season'].isin(valid_seasons)]
 
-    # הסרת שחקנים שלא עברו לקבוצה פעילה (ולא פרשו)
+    # removing retired or without club players
     df_transfers = df_transfers[~df_transfers['to_club_name'].isin(['Retired', 'Without Club'])]
 
-    # אחידות בשמות
     df_transfers['player_name'] = df_transfers['player_name'].str.strip().str.lower()
     final_df['name'] = final_df['name'].str.strip().str.lower()
 
-    # מיזוג עם טבלת השחקנים כדי להוסיף תכונות
-    # מיזוג עם טבלת השחקנים גם לפי שם וגם לפי club id
+    # merge with final_df to get attributes
     merged_transfers = pd.merge(
         df_transfers,
         final_df,
@@ -171,13 +169,10 @@ def process_and_merge_transfers(transfers_path: str, final_df: pd.DataFrame) -> 
         right_on=['name', 'current_club_id'],
         how='inner'
     )
-    # שינוי שם הקבוצה לפי מה שכתוב ב־final_df
+    # making the team names similar to the team names in final_df
     merged_transfers = merged_transfers.drop(columns=["club name"])
     merged_transfers['to_club_name'] = final_df['club name']
 
-    # הסרת עמודות כפולות ומיותרות
     merged_transfers = merged_transfers.drop(columns=['player_name', 'current_club_id'])
-    # merged_transfers = pd.merge(df_transfers, final_df, left_on='player_name', right_on='name', how='inner')
-    # merged_transfers = merged_transfers.drop(columns=['player_name'])
 
     return merged_transfers

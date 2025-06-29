@@ -33,7 +33,7 @@ def get_recommendations_tfidf(team_name: str, max_budget: int = None):
     team_players = [p for players in team_positions.values() for p in players]
     team_df = pd.DataFrame(team_players)
 
-    # by position - העיקרי
+    # by position
     candidates = df[df['position'] == selected_position].copy()
     if max_budget is not None:
         candidates['market value in eur'] = pd.to_numeric(candidates['market value in eur'], errors='coerce')

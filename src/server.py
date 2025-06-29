@@ -84,7 +84,6 @@ def results(team_name):
             player = row.to_dict()
             player['similarity_score'] = row.get('similarity_score', 0)
             players.append(player)
-        # nationality counts רק מהשחקנים המוצגים
         nationality_counts = filtered_players['country of citizenship'].value_counts().to_dict()
     except Exception as e:
         return f"Error filtering players: {str(e)}", 500
