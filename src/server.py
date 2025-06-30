@@ -31,8 +31,10 @@ def human_value(value):
 app.jinja_env.filters["human_value"] = human_value
 # ---------  /FORMAT MONEY  ---------
 
-
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
+def landing():
+    return render_template("landing.html")
+@app.route("/select_team", methods=["GET", "POST"])
 def select_team():
     if request.method == "POST":
         team_name = request.form.get("team_name")
