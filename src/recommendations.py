@@ -9,14 +9,12 @@ def wikipedia_url(name):
     return f"https://en.wikipedia.org/wiki/{quote(wiki_name)}"
 
 def proper_name(name):
-    # Capitalize each word, even if the name is lower-case or all-caps
     return " ".join([w.capitalize() for w in str(name).split()])
 
 def add_wikipedia_links(df):
     df['wikipedia_url'] = df['name'].apply(wikipedia_url)
     return df
 
-# עמודות כמו בתוצאות החיפוש
 EXTRA_COLS = [
     "acceleration", "sprint speed", "finishing", "long shots", "penalties",
     "crossing", "short passing", "long passing", "dribbling", "ball control",
@@ -34,23 +32,23 @@ def get_recommendations_tfidf(team_name: str, max_budget: int = None):
     if not all_positions:
         return (pd.DataFrame(),) * 8
 
-    # choose random position and random nationality from all df
     df = main.final_df.copy()
     df = add_wikipedia_links(df)
     df = df[df['club name'] != team_name]
-    df['name'] = df['name'].apply(proper_name)  # ← אות גדולה בכל מקום
+    df['name'] = df['name'].apply(proper_name)
 
     nationality_choices = df['country of citizenship'].dropna().unique().tolist()
     selected_position = random.choice(all_positions)
     top_nationality = random.choice(nationality_choices) if nationality_choices else "Unknown"
 
-    # עמודות שתרצה שיופיעו בטבלאות (גם אם לא קיימות בכולם)
-    cols_for_all = ['name', 'age', 'wikipedia_url', 'club name', 'country of citizenship', 'position',
-                    'market value in eur', 'similarity_score', 'contract expiration year'] + EXTRA_COLS
+    cols_for_all = [
+        'name', 'similarity_score', 'club name', 'country of citizenship', 'position',
+        'age', 'wikipedia_url', 'contract expiration year', 'market value in eur',
+        'height in cm', 'preferred foot'
+    ] + EXTRA_COLS
 
     def enrich(df_):
-        # מוסיף את כל העמודות (אם חסרה, יתווסף NaN)
-        for c in EXTRA_COLS + ['contract expiration year']:
+        for c in cols_for_all:
             if c not in df_:
                 df_[c] = None
         return df_
@@ -69,7 +67,7 @@ def get_recommendations_tfidf(team_name: str, max_budget: int = None):
     candidates_for_position = candidates[cols_for_all].sort_values(by='similarity_score', ascending=False).head(20)
     nationality_counts = candidates_for_position['country of citizenship'].value_counts().to_dict()
 
-    # by random nationality
+    # by nationality
     nat_candidates = df[df['country of citizenship'] == top_nationality].copy()
     if max_budget is not None:
         nat_candidates['market value in eur'] = pd.to_numeric(nat_candidates['market value in eur'], errors='coerce')

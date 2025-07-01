@@ -17,7 +17,7 @@ def human_value(value):
     try:
         value = int(value)
     except (TypeError, ValueError):
-        return value                     # אם לא מספר
+        return value                
 
     if value >= 1_000_000:
         num = value / 1_000_000
@@ -27,7 +27,6 @@ def human_value(value):
     else:
         return str(value)
 
-# רישום הפילטר בכל ה-templates
 app.jinja_env.filters["human_value"] = human_value
 # ---------  /FORMAT MONEY  ---------
 

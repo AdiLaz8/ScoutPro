@@ -4,9 +4,22 @@
     <meta charset="UTF-8">
     <title>Player Filters | ScoutPro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .scoutpro-logo {
+            width: 100px;
+            margin-bottom: 10px;
+            margin-left: 8px;
+        }
+        @media (max-width: 600px) {
+            .scoutpro-logo { width: 200px; }
+        }
+    </style>
 </head>
 <body>
 <div class="container py-4">
+    <div class="d-flex align-items-center mb-2">
+        <img class="scoutpro-logo" src="{{ url_for('static', filename='scoutpro-logo.png') }}" alt="ScoutPro Logo">
+    </div>
     <div class="card p-4 mx-auto w-100" style="max-width: 960px;">
         <h3 class="mb-4 text-center text-primary">Player Search Filters</h3>
         <form method="post">
@@ -20,7 +33,6 @@
                     margin: 0 auto 1rem auto;
                     background: url("{{ url_for('static', filename='img/pitch.png') }}") no-repeat center/contain;
                 }
-            
                 .pos-btn {
                     position: absolute;
                     width: 44px; height: 44px;
@@ -35,37 +47,29 @@
                 }
                 .pos-btn:hover { transform: scale(1.1); }
                 .pos-btn.selected { border-color: #ffc107; }
-            
                 .pos-gk  { bottom: 9%;   left: 50%; transform: translate(-50%, 0); }
                 .pos-lb  { bottom: 20%;  left: 16%; }
                 .pos-cb  { bottom: 20%;  left: 50%; transform: translate(-50%, 0); }
                 .pos-rb  { bottom: 20%;  right: 16%; }
-            
                 .pos-cm { bottom: 52%;  left: 50%; transform: translate(-50%, 0); }
                 .pos-lm  { bottom: 52%;  left: 16%; }
-                .pos-cdm  { bottom: 36%;  left: 50%; transform: translate(-50%, 0); }  /* היה CDM */
+                .pos-cdm  { bottom: 36%;  left: 50%; transform: translate(-50%, 0); }
                 .pos-rm  { bottom: 52%;  right: 16%; }
-            
-                .pos-cam { bottom: 70%;  left: 50%; transform: translate(-50%, 0); }  /* היה CM */
-            
+                .pos-cam { bottom: 70%;  left: 50%; transform: translate(-50%, 0); }
                 .pos-lw  { top: 10%;     left: 16%; }
                 .pos-st  { top: 10%;     left: 50%; transform: translate(-50%, 0); }
                 .pos-rw  { top: 10%;     right: 16%; }
             </style>
-            
-
             <div class="text-center mb-2">
                 <label class="form-label fw-bold mb-0">Position</label>
             </div>            
             <input type="hidden" id="position_input" name="position" value="{{ selected_filters.position or '' }}">
-
             <div class="pitch-wrapper">
                 {% for code in ['GK','LB','CB','RB','CDM','LM','CM','RM','LW','ST','RW','CAM'] %}
                     <div class="pos-btn pos-{{ code|lower }} {% if selected_filters.position == code %}selected{% endif %}"
                         data-pos="{{ code }}">{{ code }}</div>
                 {% endfor %}
             </div>
-
             <script>
             document.querySelectorAll('.pos-btn').forEach(btn=>{
                 btn.addEventListener('click',()=>{
@@ -139,8 +143,6 @@
                 <a href="{{ url_for('select_team') }}"
                    class="btn btn-outline-secondary btn-lg">← Back to Team Selection</a>
             </div>
-            
-            
         </form>
     </div>
 </div>

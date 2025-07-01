@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);}
-        .main-logo { width: 50px; position: absolute; top: 16px; left: 32px; }
+        .main-logo { width: 200px; position: absolute; top: 16px; left: 32px; }
         .card { border-radius: 18px; box-shadow: 0 8px 32px #0002; margin-bottom: 24px;}
         .prospect-badge { background: #28d; color: #fff; border-radius: 7px; padding: 2px 7px; font-size: 0.83em; margin-left: 2px; }
         .expiring-badge { background: #fa8c16; color: #fff; border-radius: 7px; padding: 2px 7px; font-size: 0.83em; margin-left: 2px;}
@@ -21,14 +21,13 @@
     </style>
 </head>
 <body>
-    <img class="main-logo animate__animated animate__tada" src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/svgs/solid/futbol.svg" alt="ScoutPro Logo">
+    <img class="main-logo animate__animated animate__tada" src="/static/scoutpro-logo.png" alt="ScoutPro Logo">
     <div class="container py-4">
         <a href="{{ url_for('select_team') }}" class="btn btn-outline-secondary mb-3">← Back to Team Selection</a>
         <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-outline-primary mb-3 ms-2">Player Search (Filters)</a>
         <h1 class="mb-3 text-primary text-center animate__fadeInDown">Smart Recommendations for {{ team_name }}</h1>
         <h4 class="text-center mb-4">Best by Position: <span class="text-info">{{ selected_position }}</span></h4>
 
-        <!-- עמודות מלאות — רק שנה את ה־for של p לפי הטבלה המתאימה -->
         {% macro player_row(p) %}
         <tr>
             <td>{{ p['name'] }}</td>
@@ -139,14 +138,12 @@
             <canvas id="nationalityChart" width="800" height="800" style="max-width:800px; max-height:800px;"></canvas>
         </div>
 
-        <!-- שאר הטבלאות: כל אחת אותו הדבר בדיוק! -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top {{ top_nationality }} Players</h5>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <!-- ... אותו thead כמו למעלה ... -->
                             <th>Name</th>
                             <th>Similarity</th>
                             <th>Club</th>
@@ -198,7 +195,6 @@
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
-                        <!-- אותו thead -->
                         <tr>
                             <!-- ... -->
                             <th>Name</th>
@@ -251,7 +247,6 @@
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
-                        <!-- אותו thead -->
                         <tr>
                             <!-- ... -->
                             <th>Name</th>
@@ -304,7 +299,6 @@
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
-                        <!-- אותו thead -->
                         <tr>
                             <!-- ... -->
                             <th>Name</th>
