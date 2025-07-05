@@ -1,3 +1,4 @@
+<!-- select_team.html - Template for selecting a team at app start -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/svgs/solid/futbol.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
+        /* Page background and main logo styles  */
         body { background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%); }
         .main-logo {
             width: 200px; position: absolute; top: 18px; left: 36px; filter: drop-shadow(0 4px 8px #0002);
@@ -22,6 +24,7 @@
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="card p-5 animate__animated animate__fadeInDown" style="min-width:340px; max-width:440px;">
             <h2 class="mb-4 text-center text-primary animate__fadeInDown">ScoutPro Football Analytics</h2>
+            <!-- Team selection form -->
             <form method="post" id="teamForm">
                 <div class="mb-3">
                     <label for="team_name" class="form-label fw-bold">Choose Team</label>
@@ -32,6 +35,7 @@
                         {% endfor %}
                     </select>
                 </div>
+                <!-- Filter and smart recs buttons -->
                 <div class="d-grid gap-3 mt-4">
                     <button type="submit" name="action" value="filters" class="btn btn-primary btn-lg" id="toFiltersBtn">Player Search (Filters)</button>
                     <button type="button" class="btn btn-success btn-lg" id="toRecsBtn">Smart Recommendations</button>
@@ -39,6 +43,7 @@
             </form>
         </div>
     </div>
+    <!-- Handles redirect for 'Smart Recommendations' if team is selected -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const toRecsBtn = document.getElementById('toRecsBtn');

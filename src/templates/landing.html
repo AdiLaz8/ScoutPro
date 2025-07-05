@@ -1,3 +1,4 @@
+<!-- landing.html - Landing page for ScoutPro -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <title>ScoutPro – Welcome</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Main full-height hero background */
         body, html { height: 100%; margin: 0; }
         .hero-bg {
             background: url('/static/scoutpro-hero.png') no-repeat center center;
@@ -16,6 +18,7 @@
             justify-content: flex-end;
             position: relative;
         }
+        /* Content box on the right side */
         .hero-content {
             background: rgba(0,32,16,0.37);
             border-radius: 28px;
@@ -26,13 +29,7 @@
             margin-right: 6vw;
             box-shadow: 0 10px 36px #0005;
         }
-        /* .scoutpro-logo {
-            position: absolute;
-            bottom: 36px;
-            right: 46px;
-            opacity: 0.80;
-            width: 90px;
-        } */
+        /* Start button at the bottom center */
         .start-btn-bottom {
             position: absolute;
             left: 50%;
@@ -46,11 +43,11 @@
     </style>
 </head>
 <body>
+    <!-- Main hero section with background image -->
     <div class="hero-bg">
         <div class="hero-content">
         </div>
         <a href="/select_team" class="btn btn-success btn-lg shadow-lg start-btn-bottom">Start Scouting</a>
-        <!-- <img src="/static/scoutpro-logo.png" class="scoutpro-logo" alt="ScoutPro Logo"> -->
     </div>
 </body>
 </html>

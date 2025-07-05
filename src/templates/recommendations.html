@@ -1,3 +1,4 @@
+<!-- recommendations.html - Template for the smart recommendations page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* General background and look */
         body { background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);}
         .main-logo { width: 200px; position: absolute; top: 16px; left: 32px; }
         .card { border-radius: 18px; box-shadow: 0 8px 32px #0002; margin-bottom: 24px;}
@@ -23,8 +25,10 @@
 <body>
     <img class="main-logo animate__animated animate__tada" src="/static/scoutpro-logo.png" alt="ScoutPro Logo">
     <div class="container py-4">
+        <!-- Navigation buttons to other pages -->
         <a href="{{ url_for('select_team') }}" class="btn btn-outline-secondary mb-3">← Back to Team Selection</a>
         <a href="{{ url_for('select_criteria', team_name=team_name) }}" class="btn btn-outline-primary mb-3 ms-2">Player Search (Filters)</a>
+        <!-- Title & chosen position -->
         <h1 class="mb-3 text-primary text-center animate__fadeInDown">Smart Recommendations for {{ team_name }}</h1>
         <h4 class="text-center mb-4">Best by Position: <span class="text-info">{{ selected_position }}</span></h4>
 
@@ -53,7 +57,6 @@
             <td>{{ p['market value in eur'] | human_value }}</td>
             <td>{{ p.get('height in cm', 'n/a') }}</td>
             <td>{{ p.get('preferred foot', 'n/a') }}</td>
-            <!-- EXTRA COLUMNS -->
             <td>{{ p.get('acceleration', 'n/a') }}</td>
             <td>{{ p.get('sprint speed', 'n/a') }}</td>
             <td>{{ p.get('finishing', 'n/a') }}</td>
@@ -80,7 +83,7 @@
         </tr>
         {% endmacro %}
 
-        <!-- Top by Position -->
+        <!-- Top recommended players for selected position -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top {{ selected_position }} Recommendations</h5>
             <div class="table-responsive">
@@ -98,7 +101,6 @@
                             <th>Market Value</th>
                             <th>Height</th>
                             <th>Preferred Foot</th>
-                            <!-- extra cols -->
                             <th>Acceleration</th>
                             <th>Sprint Speed</th>
                             <th>Finishing</th>
@@ -133,11 +135,11 @@
             </div>
         </div>
 
-        <!-- Pie Chart -->
+        <!-- Pie Chart by nationality -->
         <div class="mb-4 d-flex justify-content-center">
             <canvas id="nationalityChart" width="800" height="800" style="max-width:800px; max-height:800px;"></canvas>
         </div>
-
+        <!-- Top nationality group -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top {{ top_nationality }} Players</h5>
             <div class="table-responsive">
@@ -155,7 +157,6 @@
                             <th>Market Value</th>
                             <th>Height</th>
                             <th>Preferred Foot</th>
-                            <!-- extra cols -->
                             <th>Acceleration</th>
                             <th>Sprint Speed</th>
                             <th>Finishing</th>
@@ -189,14 +190,13 @@
                 </table>
             </div>
         </div>
-        <!-- Hot -->
+        <!-- Hot players section -->
         <div class="card p-3 animate__fadeIn">
             <h5 class="mb-2">Top "Hot" Players</h5>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <!-- ... -->
                             <th>Name</th>
                             <th>Similarity</th>
                             <th>Club</th>
@@ -248,7 +248,6 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <!-- ... -->
                             <th>Name</th>
                             <th>Similarity</th>
                             <th>Club</th>
@@ -300,7 +299,6 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <!-- ... -->
                             <th>Name</th>
                             <th>Similarity</th>
                             <th>Club</th>
@@ -347,7 +345,7 @@
         </div>
     </div>
     <script>
-        // Nationality pie chart
+        // Draw nationality pie chart after page loads
         const nationalityData = {{ nationality_counts|tojson }};
         window.onload = function () {
             if (document.getElementById('nationalityChart')) {

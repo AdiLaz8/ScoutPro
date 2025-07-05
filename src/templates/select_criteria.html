@@ -1,3 +1,4 @@
+<!-- select_criteria.html - Template for player search/filter page -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -24,6 +25,7 @@
         <h3 class="mb-4 text-center text-primary">Player Search Filters</h3>
         <form method="post">
             <!-- === POSITION MAP ================================================== -->
+             <!-- Position selector - user clicks a button on the pitch to select a position-->
             <style>
                 .pitch-wrapper { margin-top: .25rem !important;
                     position: relative;
@@ -70,6 +72,7 @@
                         data-pos="{{ code }}">{{ code }}</div>
                 {% endfor %}
             </div>
+            <!-- Script for handling selection of positions on the pitch -->
             <script>
             document.querySelectorAll('.pos-btn').forEach(btn=>{
                 btn.addEventListener('click',()=>{
@@ -80,6 +83,7 @@
             });
             </script>
             <!-- === POSITION MAP END ============================================== -->
+             <!-- Age and value filters -->
             <div class="row g-2">
                 <div class="col-6">
                     <label class="form-label">Min Age</label>
@@ -90,6 +94,7 @@
                     <input type="number" name="max_age" class="form-control" min="15" value="{{ selected_filters.max_age or '' }}">
                 </div>
             </div>
+            <!-- Filter by Nationality -->
             <div class="row g-2 mt-2">
                 <div class="col-6">
                     <label class="form-label">Max Market Value (€)</label>
@@ -100,6 +105,7 @@
                     <input type="number" name="min_height" class="form-control" min="150" value="{{ selected_filters.min_height or '' }}">
                 </div>
             </div>
+            <!-- Filter by Preferred Foot -->
             <div class="mb-2 mt-3">
                 <label class="form-label">Nationality</label>
                 <select name="nationality" class="form-select">
@@ -109,6 +115,7 @@
                     {% endfor %}
                 </select>
             </div>
+            <!-- Submit and navigation buttons -->
             <div class="mb-2">
                 <label class="form-label">Preferred Foot</label>
                 <select name="preferred_foot" class="form-select">
