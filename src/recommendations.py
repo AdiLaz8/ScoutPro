@@ -2,6 +2,7 @@ import pandas as pd
 import main
 import random
 import urllib.parse
+#recommendations.py - Provides player recommendations by position, nationality, and custom filters
 
 def wikipedia_url(name):
     from urllib.parse import quote
@@ -22,7 +23,7 @@ EXTRA_COLS = [
     "strength", "stamina", "vision", "gk reflexes", "gk kicking",
     "weak foot", "skill moves", "assists", "goals"
 ]
-
+# building recomandation page
 def get_recommendations_tfidf(team_name: str, max_budget: int = None):
     if team_name not in main.team_dict:
         raise ValueError(f"Team {team_name} not found.")

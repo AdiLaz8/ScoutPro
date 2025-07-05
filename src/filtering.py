@@ -2,12 +2,13 @@ import pandas as pd
 import main
 from typing import Optional
 import urllib.parse
+# filtering.py - Provides player filtering logic by user criteria
 
 def get_wikipedia_url(name):
     name_parts = name.strip().split()
     url_name = "_".join([part.capitalize() for part in name_parts])
     return f"https://en.wikipedia.org/wiki/{urllib.parse.quote(url_name)}"
-
+# filtering the user choices
 def filter_players_by_criteria(
         team_name: str,
         position: str,

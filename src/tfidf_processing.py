@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+#tfidf_processing.py - Utility functions for player attribute processing, tokenization, and similarity calculation using TF-IDF
 
 def prepare_values_for_tokenizing(final: pd.DataFrame) -> pd.DataFrame:
     """For a given dataframe of players, sanitize and prepare the attributes' names and values for tokenizing."""

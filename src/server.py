@@ -3,36 +3,33 @@ import filtering
 import main
 import recommendations
 import pandas as pd
+#server.py - Handles landing page, team selection, filtering, results, and smart recommendations via Flask Server
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key_here"
-# ---------  FORMAT MONEY  ---------
+app.secret_key = "not_so_secret"
+
+# adjusting the values to readable numbers
 def human_value(value):
-    """
-    950        -> 950
-    27 500     -> 28K
-    1 200 000  -> 1.2M
-    55 000 000 -> 55M
-    """
     try:
         value = int(value)
     except (TypeError, ValueError):
         return value                
-
+    # 1.0M -> 1M
     if value >= 1_000_000:
         num = value / 1_000_000
-        return f"{num:.1f}M".rstrip('0').rstrip('.')  # 1.0M -> 1M
+        return f"{num:.1f}M".rstrip('0').rstrip('.')  
     elif value >= 1_000:
         return f"{round(value / 1_000)}K"
     else:
         return str(value)
 
 app.jinja_env.filters["human_value"] = human_value
-# ---------  /FORMAT MONEY  ---------
-
+#landing page
 @app.route("/")
 def landing():
     return render_template("landing.html")
+
+#select team page
 @app.route("/select_team", methods=["GET", "POST"])
 def select_team():
     if request.method == "POST":
@@ -47,6 +44,7 @@ def select_team():
     teams = list(main.team_dict.keys())
     return render_template("select_team.html", teams=teams)
 
+#filter page
 @app.route("/criteria/<team_name>", methods=["GET", "POST"])
 def select_criteria(team_name):
     if request.method == "POST":
@@ -70,6 +68,7 @@ def select_criteria(team_name):
         selected_filters=selected_filters
     )
 
+#filter resault page
 @app.route("/results/<team_name>")
 def results(team_name):
     position = request.args.get("position")
@@ -118,6 +117,7 @@ def results(team_name):
         "results.html", players=players, team_name=team_name, position=position, nationality_counts=nationality_counts
     )
 
+#smart recommendations page
 @app.route("/recommendations/<team_name>")
 def recommendations_page(team_name):
     max_budget = session.get("max_budget")
