@@ -1,6 +1,6 @@
-![Logo](images/logo.jpg)
+![Logo](recsys-workshop-main/images/logo.jpg)
 
-# Your super cool app name
+# ScoutPro
 ScoutPro
 Smarter scouting. Data-driven decisions. Game-changing results.
 Modern football is driven by data. Clubs manage hundreds of player profiles.
@@ -13,9 +13,9 @@ ScoutPro was built to fill this gap - giving every scout the power of smart anal
 
 You can find all the documentation in the following files:
 
-- [Installation Guide](install.md)
-- [Project Summary](summary.md)
-- [Modules Description](modules.md)
+- [Installation Guide](recsys-workshop-main/install.md)
+- [Project Summary](recsys-workshop-main/summary.md)
+- [Modules Description](recsys-workshop-main/modules.md)
 
 &nbsp;<br>
 ## About
@@ -35,8 +35,8 @@ More information can be found on the [Workshop Website](https://courses.cs.tau.a
 
 ## Screenshots
 
-Here is a screenshot of the application interface:
+Here are some screenshots of the application interface:
 
-![Application Screenshot](images/screenshot1.jpg)
-![Application Screenshot](images/screenshot2.jpg)
-![Application Screenshot](images/screenshot3.jpg)
+![Application Screenshot](recsys-workshop-main/images/screenshot1.jpg)
+![Application Screenshot](recsys-workshop-main/images/screenshot2.jpg)
+![Application Screenshot](recsys-workshop-main/images/screenshot3.jpg)
