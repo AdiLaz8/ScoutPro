@@ -1,6 +1,6 @@
 ![Logo](images/logo.jpg)
 
-# Your super cool app name
+# ScoutPro
 ScoutPro
 Smarter scouting. Data-driven decisions. Game-changing results.
 Modern football is driven by data. Clubs manage hundreds of player profiles.
